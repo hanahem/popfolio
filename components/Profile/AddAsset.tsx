@@ -2,10 +2,11 @@ import React, { FC, useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { db } from "../../utils/dbInit";
 import { Asset, Wallet } from "../../utils/types";
+import AssetSearchBar from "../Generics/AssetSearchBar";
 import SelectItem from "../Generics/SelectItem";
 
 const AddAsset: FC = () => {
-  const [openSelect, setOpenSelect] = useState(false);
+  const [openSelectWallet, setOpenSelectWallet] = useState(false);
   const [wallets, setWallets] = useState<Wallet[] | undefined>(undefined);
   const [loading, setLoading] = useState(false);
 
@@ -18,7 +19,7 @@ const AddAsset: FC = () => {
     })();
   }, [db, loading]);
 
-  console.log(wallets)
+  console.log(wallets);
 
   const {
     register,
@@ -35,7 +36,7 @@ const AddAsset: FC = () => {
         you created.
       </p>
       <form className="mt-4 flex flex-col" onSubmit={handleSubmit(onSubmit)}>
-        <div className="form-input">
+        {/* <div className="form-input">
           <label>Name</label>
           <input
             placeholder="Ethereum, Bitcoin, ShibaInu..."
@@ -44,29 +45,9 @@ const AddAsset: FC = () => {
           {errors.name && (
             <span className="text-red-500">This field is required</span>
           )}
-        </div>
+        </div> */}
 
-        <div className="form-input">
-          <label>Ticker</label>
-          <input
-            placeholder="ETH, BTC, SHIB..."
-            {...register("ticker", { required: true })}
-          />
-          {errors.ticker && (
-            <span className="text-red-500 text-xs">This field is required</span>
-          )}
-        </div>
-
-        <div className="form-input">
-          <label>Icon</label>
-          <input
-            placeholder="Place a valid token icon URL"
-            {...register("icon", { required: true })}
-          />
-          {errors.icon && (
-            <span className="text-red-500 text-xs">This field is required</span>
-          )}
-        </div>
+        <AssetSearchBar />
 
         <div className="form-input">
           <label>Linked Wallet</label>
@@ -75,21 +56,26 @@ const AddAsset: FC = () => {
               className="w-full bg-white"
               placeholder="Binance, Coinbase, Metamask 1 ..."
               {...register("walletId", { required: true })}
-              onClick={() => setOpenSelect(!openSelect)}
+              onFocus={() => setOpenSelectWallet(!openSelectWallet)}
+              onBlur={() => setOpenSelectWallet(!openSelectWallet)}
             />
             {errors.walletId && (
               <span className="text-red-500 text-xs">
                 This field is required
               </span>
             )}
-            {openSelect ? (
+            {openSelectWallet ? (
               <div
-                onBlur={() => setOpenSelect(false)}
-                className="absolute shadow-lg bg-white top-100 z-40 w-full lef-0 overflow-y-scroll"
+                onBlur={() => setOpenSelectWallet(false)}
+                className="absolute shadow-lg bg-white top-100 z-40 w-full left-0"
               >
-                {wallets?.map((w: Wallet) => {
-                    <SelectItem icon={w.icon} />
-                })}
+                <div className="relative h-60 overflow-y-scroll">
+                  {wallets
+                    ? wallets.map((w: Wallet, idx: number) => {
+                        return <SelectItem key={idx} title={w.icon} />;
+                      })
+                    : null}
+                </div>
               </div>
             ) : null}
           </div>
