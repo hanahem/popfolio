@@ -5,6 +5,7 @@ export type Asset = {
   address?: string;
   icon: string;
   currentPrice?: number;
+  amount?: number;
 };
 
 export type Assets = Asset[] | undefined[];

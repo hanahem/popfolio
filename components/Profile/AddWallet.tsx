@@ -1,5 +1,6 @@
-import React, { FC } from "react";
+import React, { FC, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { db } from "../../utils/dbInit";
 import { Wallet } from "../../utils/types";
 
 const AddWallet: FC = () => {
@@ -8,7 +9,16 @@ const AddWallet: FC = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<Wallet>();
-  const onSubmit: SubmitHandler<Wallet> = (data) => console.log(data);
+  const onSubmit: SubmitHandler<Wallet> = (data) => addWallet(data);
+
+  const [loading, setLoading] = useState(false);
+
+  const addWallet = async (data: { name: string; icon: string }) => {
+    setLoading(true);
+    await db.addWallet(data);
+    setLoading(false);
+  };
+
   return (
     <div className="board flex flex-col">
       <p className="text-xl">Add a wallet</p>
@@ -24,11 +34,22 @@ const AddWallet: FC = () => {
 
         <div className="form-input">
           <label>Name *</label>
-          <input placeholder="Binance, Coinbase, Metamask 1..." {...register("name", { required: true })} />
-          {errors.name && <span className="text-red-500 text-xs">This field is required</span>}
+          <input
+            placeholder="Binance, Coinbase, Metamask 1..."
+            {...register("name", { required: true })}
+          />
+          {errors.name && (
+            <span className="text-red-500 text-xs">This field is required</span>
+          )}
         </div>
 
-        <button type="submit" className="btn-primary mt-4">Add Wallet</button>
+        {loading ? (
+          <span className="donutSpinner" />
+        ) : (
+          <button type="submit" className="btn-primary mt-4">
+            Add Wallet
+          </button>
+        )}
       </form>
     </div>
   );
