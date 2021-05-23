@@ -28,7 +28,7 @@ export class PortfolioDataBase extends Dexie {
         icon,
       })
       .catch((e: any) => {
-        alert("error: " + e.stack || e);
+        console.error("error: " + e.stack || e);
       });
   };
 

@@ -18,12 +18,12 @@ const AddWallet: FC = () => {
       </p>
       <form className="mt-4 flex flex-col" onSubmit={handleSubmit(onSubmit)}>
         <div className="form-input">
-          <label>Icon</label>
+          <label>Icon (optional)</label>
           <input placeholder="A valid icon image URL" {...register("icon")} />
         </div>
 
         <div className="form-input">
-          <label>Name</label>
+          <label>Name *</label>
           <input placeholder="Binance, Coinbase, Metamask 1..." {...register("name", { required: true })} />
           {errors.name && <span className="text-red-500 text-xs">This field is required</span>}
         </div>

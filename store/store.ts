@@ -1,46 +1,30 @@
-import {useMemo} from 'react'
-import {createStore, applyMiddleware, Store, AnyAction} from 'redux'
-import {composeWithDevTools} from 'redux-devtools-extension'
+import { useMemo } from "react";
+import { createStore, applyMiddleware, Store } from "redux";
+import { composeWithDevTools } from "redux-devtools-extension";
+import { Assets, Portfolio } from "../utils/types";
+import { reducer } from "./portfolio/reducers";
 
-let store: Store | undefined;
+export let store: Store | undefined;
 
 export type CustomState = {
-  metamask: {
-    init: boolean;
-    accounts: string[];
-  },
+  wallets: Portfolio;
+  assets: Assets;
+};
+
+export const initialState: CustomState = { wallets: {}, assets: [] };
+
+export enum ActionTypes {
+  IDBTX_START = "IDBTX_START",
+  IDBTX_SUCC = "IDBTX_SUCC",
+  IDBTX_FAIL = "IDBTX_FAIL",
 }
-
-const initialState: CustomState = {
-  metamask: {
-    init: false,
-    accounts: [],
-  },
-};
-
-const reducer = (state = initialState, action: AnyAction) => {
-  switch (action.type) {
-    case 'SET_MM_INIT':
-      return {
-        ...state,
-        metamask: {...state.metamask, init: action.payload}
-      };
-    case 'SET_ACCOUNTS':
-      return {
-        ...state,
-        accounts: action.payload.accounts,
-      };
-    default:
-      return state
-  }
-};
 
 function initStore(preloadedState = initialState) {
   return createStore(
     reducer,
     preloadedState,
     composeWithDevTools(applyMiddleware())
-  )
+  );
 }
 
 export const initializeStore = (preloadedState: CustomState) => {
@@ -54,18 +38,18 @@ export const initializeStore = (preloadedState: CustomState) => {
       ...preloadedState,
     });
     // Reset the current store
-    store = undefined
+    store = undefined;
   }
 
   // For SSG and SSR always create a new store
-  if (typeof window === 'undefined') return _store;
+  if (typeof window === "undefined") return _store;
   // Create the store once in the client
   if (!store) store = _store;
 
-  return _store
+  return _store;
 };
 
 export function useStore(initialState: any) {
-  const store = useMemo(() => initializeStore(initialState), [initialState])
-  return store
+  const store = useMemo(() => initializeStore(initialState), [initialState]);
+  return store;
 }

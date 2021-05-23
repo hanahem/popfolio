@@ -1,9 +1,13 @@
 import axios, { CancelTokenSource } from "axios";
 import React, { FC, SyntheticEvent, useState } from "react";
 import SelectItem from "./SelectItem";
-import { ICoinsLite, ICoinsMarket } from "@coingecko/cg-api-ts";
+import { ICoinsLite } from "@coingecko/cg-api-ts";
+import { Asset } from "../../utils/types";
 
-const AssetSearchBar: FC = () => {
+const SearchAsset: FC<{ setAsset: (a: Asset) => void; asset?: Asset }> = ({
+  setAsset,
+  asset,
+}) => {
   const [openSelectAsset, setOpenSelectAsset] = useState(false);
 
   const [searchAsset, setSearchAsset] = useState<{
@@ -17,8 +21,7 @@ const AssetSearchBar: FC = () => {
     loading: false,
     message: "",
   });
-  const [cancelSearch, setCancelSearch] =
-    useState<CancelTokenSource | undefined>();
+  const [cancelSearch] = useState<CancelTokenSource | undefined>();
 
   const handleOnSearchChange = (event: SyntheticEvent): void => {
     const { value } = event.target as HTMLInputElement;
@@ -27,11 +30,11 @@ const AssetSearchBar: FC = () => {
       setSearchAsset({ ...searchAsset, query, results: {}, message: "" });
     } else {
       setSearchAsset({ ...searchAsset, query, loading: true, message: "" });
-      fetchSearchResults(1, query);
+      fetchSearchResults(query);
     }
   };
 
-  const fetchSearchResults = (updatedPageNo: number, query: string): void => {
+  const fetchSearchResults = (query: string): void => {
     // By default the limit of results is 20
     const searchUrl = `https://api.coingecko.com/api/v3/coins`;
     if (cancelSearch) {
@@ -70,17 +73,30 @@ const AssetSearchBar: FC = () => {
       });
   };
 
+  const selectAsset = (event: SyntheticEvent, cgAsset: ICoinsLite) => {
+    event.preventDefault();
+    setAsset({
+      ...asset,
+      name: cgAsset.name,
+      ticker: cgAsset.symbol,
+      icon: cgAsset.image.large,
+      currentPrice: cgAsset.market_data.current_price,
+    });
+    setOpenSelectAsset(!openSelectAsset);
+  };
+
   const { results, message, loading } = searchAsset;
 
   return (
     <div className="form-input">
-      <label>Asset</label>
+      <label>Asset *</label>
       <div className="relative">
         <input
           className="w-full bg-white"
+          value={asset?.name}
           placeholder="Search assets..."
-          onFocus={() => setOpenSelectAsset(!openSelectAsset)}
-          onBlur={() => setOpenSelectAsset(!openSelectAsset)}
+          onFocus={() => setOpenSelectAsset(true)}
+          onBlur={() => setOpenSelectAsset(false)}
           onChange={handleOnSearchChange}
         />
         {openSelectAsset ? (
@@ -92,12 +108,18 @@ const AssetSearchBar: FC = () => {
               {Object.keys(results).length && results.length
                 ? results?.map((asset: ICoinsLite) => {
                     return (
-                      <SelectItem
+                      <div
                         key={asset.id}
-                        icon={asset.image.large}
-                        title={asset.name}
-                        subtitle={asset.symbol.toUpperCase()}
-                      />
+                        onMouseDown={(e: SyntheticEvent): void =>
+                          selectAsset(e, asset)
+                        }
+                      >
+                        <SelectItem
+                          icon={asset.image.large}
+                          title={asset.name}
+                          subtitle={asset.symbol.toUpperCase()}
+                        />
+                      </div>
                     );
                   })
                 : null}
@@ -113,4 +135,4 @@ const AssetSearchBar: FC = () => {
   );
 };
 
-export default AssetSearchBar;
+export default SearchAsset;

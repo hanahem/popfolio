@@ -1,5 +1,5 @@
 export type Asset = {
-  walletId: string;
+  walletId?: string;
   name: string;
   ticker: string;
   address?: string;
@@ -16,6 +16,7 @@ export interface ListedAsset extends Asset {
 }
 
 export type Wallet = {
+  id?: number;
   walletId?: string;
   name: string;
   icon: string;
