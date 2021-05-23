@@ -6,6 +6,7 @@ export type Asset = {
   icon: string;
   currentPrice?: number;
   amount?: number;
+  cgId?: string;
 };
 
 export type Assets = Asset[] | undefined[];

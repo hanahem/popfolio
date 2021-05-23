@@ -35,10 +35,7 @@ const AddAsset: FC = () => {
     }
   };
 
-  const { handleSubmit } = useForm<Asset>();
-
   const addAsset = async (asset: Asset): Promise<void> => {
-    console.log("ahhh", asset)
     setLoading(true);
     await db.addAsset(asset);
     setLoading(false);

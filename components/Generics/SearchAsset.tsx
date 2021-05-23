@@ -83,6 +83,7 @@ const SearchAsset: FC<{ setAsset: (a: Asset) => void; asset?: Asset }> = ({
       ticker: cgAsset.symbol,
       icon: cgAsset.image.large,
       currentPrice: cgAsset.market_data.current_price,
+      cgId: cgAsset.id,
     });
     setSearchAsset({
       ...searchAsset,
