@@ -1,0 +1,36 @@
+{
+  "name": "with-typescript",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start",
+    "type-check": "tsc"
+  },
+  "dependencies": {
+    "@coingecko/cg-api-ts": "^0.0.45",
+    "dexie": "dexie@>=3.1.0-alpha.1",
+    "dexie-react-hooks": "latest",
+    "next": "latest",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-hook-form": "^7.6.4",
+    "redux": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.21",
+    "@types/react": "^17.0.2",
+    "@types/react-dom": "^17.0.1",
+    "@types/react-redux": "^7.1.16",
+    "autoprefixer": "^10.2.4",
+    "postcss": "^8.2.7",
+    "react-redux": "^7.2.2",
+    "redux-devtools": "^3.7.0",
+    "redux-devtools-extension": "^2.13.8",
+    "redux-thunk": "^2.3.0",
+    "reselect": "^4.0.0",
+    "tailwindcss": "^2.0.3",
+    "typescript": "4.0"
+  },
+  "license": "MIT"
+}
