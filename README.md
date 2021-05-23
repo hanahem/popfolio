@@ -1,4 +1,4 @@
-![Kiwi](./public/images/logo_small.png)
+<!-- ![Kiwi](./public/images/logo_small.png)
 
 # Kiwi dApp
 
@@ -149,4 +149,6 @@ async function checkERC20Amount(web3: any, userAddress: string, erc20Address: st
     <img src="https://cdn.worldvectorlogo.com/logos/tailwindcss.svg" alt="TailwindCSS" width="30px"/>
     <img src="https://miro.medium.com/max/1400/1*2GHi9FwnyA5UTJpcxPSG7A.jpeg" alt="web3" width="30px"/>
     <img src="https://platform.eductx.org/static/media/metamask.5e06983f.png" alt="Metamask" width="30px"/>
-</p>
+</p> -->
+
+<p>Work in progress</p>
