@@ -15,11 +15,13 @@ const SearchAsset: FC<{ setAsset: (a: Asset) => void; asset?: Asset }> = ({
     results: any;
     loading: boolean;
     message: string;
+    selected: boolean;
   }>({
     query: "",
     results: [],
     loading: false,
     message: "",
+    selected: false,
   });
   const [cancelSearch] = useState<CancelTokenSource | undefined>();
 
@@ -27,9 +29,9 @@ const SearchAsset: FC<{ setAsset: (a: Asset) => void; asset?: Asset }> = ({
     const { value } = event.target as HTMLInputElement;
     const query = value;
     if (!query) {
-      setSearchAsset({ ...searchAsset, query, results: {}, message: "" });
+      setSearchAsset({ ...searchAsset, query, results: {}, message: "", selected: false });
     } else {
-      setSearchAsset({ ...searchAsset, query, loading: true, message: "" });
+      setSearchAsset({ ...searchAsset, query, loading: true, message: "", selected: false });
       fetchSearchResults(query);
     }
   };
@@ -82,10 +84,15 @@ const SearchAsset: FC<{ setAsset: (a: Asset) => void; asset?: Asset }> = ({
       icon: cgAsset.image.large,
       currentPrice: cgAsset.market_data.current_price,
     });
+    setSearchAsset({
+      ...searchAsset,
+      query: cgAsset.name,
+      selected: true,
+    });
     setOpenSelectAsset(!openSelectAsset);
   };
 
-  const { results, message, loading } = searchAsset;
+  const { results, query, message, loading, selected } = searchAsset;
 
   return (
     <div className="form-input">
@@ -93,7 +100,7 @@ const SearchAsset: FC<{ setAsset: (a: Asset) => void; asset?: Asset }> = ({
       <div className="relative">
         <input
           className="w-full bg-white"
-          value={asset?.name}
+          value={selected ? query : undefined}
           placeholder="Search assets..."
           onFocus={() => setOpenSelectAsset(true)}
           onBlur={() => setOpenSelectAsset(false)}

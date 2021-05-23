@@ -36,7 +36,13 @@ const AddAsset: FC = () => {
   };
 
   const { handleSubmit } = useForm<Asset>();
-  const onSubmit: SubmitHandler<Asset> = (data) => console.log(data);
+  const onSubmit: SubmitHandler<Asset> = (data) => addAsset;
+
+  const addAsset = async (asset: Asset): Promise<void> => {
+    setLoading(true);
+    await db.addAsset(asset);
+    setLoading(false);
+  };
 
   return (
     <div className="board flex flex-col">
