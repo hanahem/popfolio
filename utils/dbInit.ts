@@ -46,7 +46,7 @@ export class PortfolioDataBase extends Dexie {
 
   addAsset = (asset: Asset) => {
     db.assets.add(asset).catch((e: any) => {
-      alert("error: " + e.stack || e);
+      console.error("error: " + e.stack || e);
     });
   };
 }

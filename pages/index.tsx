@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../utils/dbInit";
-// import Dexie from "dexie";
-import { useLiveQuery } from "dexie-react-hooks";
 import { Wallet } from "../utils/types";
 
 const IndexPage = () => {
@@ -36,32 +34,13 @@ const IndexPage = () => {
     })();
   }, [db, loading]);
 
-  // console.log(wallets)
-
-  // const wallets = useLiveQuery(
-  //   async () => await db.wallets.toArray()
-  // );
-
-
   console.log(wallets || "NONE");
 
   return (
     <div
-      className={`w-1/2 flex flex-col items-center content-center m-auto text-center mt-20`}
+      className="w-full m-2"
     >
-      <button
-        onClick={async () => {
-          setLoading(true);
-          await db.addWallet({
-            walletId: "roi",
-            name: "hola",
-            icon: "icon.png",
-          });
-          setLoading(false);
-        }}
-      >
-        add wallet
-      </button>
+     <p className="text-left">ded</p> 
     </div>
   );
 };

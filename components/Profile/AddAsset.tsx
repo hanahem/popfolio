@@ -36,9 +36,9 @@ const AddAsset: FC = () => {
   };
 
   const { handleSubmit } = useForm<Asset>();
-  const onSubmit: SubmitHandler<Asset> = (data) => addAsset;
 
   const addAsset = async (asset: Asset): Promise<void> => {
+    console.log("ahhh", asset)
     setLoading(true);
     await db.addAsset(asset);
     setLoading(false);
@@ -51,7 +51,7 @@ const AddAsset: FC = () => {
         You can your assets and the right amounts, then link them to the wallets
         you created.
       </p>
-      <form className="mt-4 flex flex-col" onSubmit={handleSubmit(onSubmit)}>
+      <form className="mt-4 flex flex-col" onSubmit={() => addAsset(asset)}>
         <SearchAsset setAsset={setAsset} asset={asset} />
         <SearchWallet setAsset={setAsset} asset={asset} wallets={wallets} />
         <div className="form-input">
