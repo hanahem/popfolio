@@ -53,15 +53,15 @@ const TimeFrameControls: FC<TimeFrameProps> = ({
 
 type TooltipData = CryptoPrice;
 
-export const background = "#3b6978";
-export const background2 = "#204051";
-export const accentColor = "#edffea";
-export const accentColorDark = "#75daad";
+export const background = "white";
+export const background2 = "white";
+export const accentColor = "#1D4ED8";
+export const accentColorDark = "#1D4ED8";
 const tooltipStyles = {
   ...defaultStyles,
   background,
   border: "1px solid white",
-  color: "white",
+  color: "#1D4ED8",
 };
 
 // util
@@ -119,18 +119,6 @@ export default withTooltip<AreaProps, TooltipData>(
         );
       }
     }, [prices.data]);
-
-    // useEffect(() => {
-    //   if (selectedTimeFrame) {
-    //     (async function () {
-    //       try {
-    //         await dispatch(getPrices(selectedTimeFrame));
-    //       } catch (e) {
-    //         console.error("getPrices error: ", e);
-    //       }
-    //     })();
-    //   }
-    // }, [selectedTimeFrame]);
 
     // bounds
     const innerWidth = width - margin.left - margin.right;
@@ -204,7 +192,7 @@ export default withTooltip<AreaProps, TooltipData>(
             id="area-gradient"
             from={accentColor}
             to={accentColor}
-            toOpacity={0.1}
+            // toOpacity={0.1}
           />
           <GridRows
             left={margin.left}
