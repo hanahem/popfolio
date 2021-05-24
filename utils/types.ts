@@ -30,3 +30,13 @@ export type Wallet = {
 export interface Portfolio {
   [walletId: string]: Wallet;
 }
+
+export type CryptoPrice = {
+  date: string;
+  close: number;
+};
+
+export type TimeFrame = {
+  label: string;
+  value: string;
+};
