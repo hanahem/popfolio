@@ -20,6 +20,7 @@ export default function App({ Component, pageProps }: AppProps) {
             content="initial-scale=1.0, width=device-width"
           />
           <link rel="shortcut icon" href="/favicon.ico" />
+          <script src="/node_modules/@lottiefiles/lottie-player/dist/lottie-player.js"></script>
         </Head>
         <SidebarWrapper>
           <Component {...pageProps} />

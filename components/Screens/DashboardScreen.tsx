@@ -1,11 +1,19 @@
 import React, { FC, useEffect } from "react";
+import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CustomState, loadDb } from "../../store/store";
+import { lottieAnimation } from "../../utils/animation";
 import { db } from "../../utils/dbInit";
 import OverviewChart from "../Charts/OverviewChart";
 import Title from "../Generics/Title";
 
 const DashboardScreen: FC = () => {
+  const lottieRef = useRef(null);
+
+  useEffect(() => {
+    import("@lottiefiles/lottie-player");
+  });
+
   const dispatch = useDispatch();
 
   const storeDb = useSelector((state: CustomState) => state.db);
@@ -26,11 +34,31 @@ const DashboardScreen: FC = () => {
         title="Overview"
         subtitle="An overview of your portfolio and assets performance"
       />
-      <div className="flex flex-col mt-8 w-full h-32">
+      <div className="w-full mt-8">
         {storeDb ? (
           <OverviewChart ids={storeDb.plainAssets} assets={storeDb.assets} />
         ) : (
           <div className="h-44 animate-pulse" />
+        )}
+      </div>
+      <Title title="Wallets" />
+      <div className="mt-4">
+        {storeDb ? (
+          <p>yooo</p>
+        ) : (
+          <div className="h-20 flex-col flex justify-center items-center">
+            <lottie-player
+              ref={lottieRef}
+              autoplay
+              loop
+              mode={"normal"}
+              src={JSON.stringify(lottieAnimation)}
+              className={"absolute inset-0 w-full h-full object-cover"}
+            />
+            <p className="text-sm mt-2">
+              You don't have any wallets or assets yet
+            </p>
+          </div>
         )}
       </div>
     </div>

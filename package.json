@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@coingecko/cg-api-ts": "^0.0.45",
+    "@lottiefiles/lottie-player": "^1.0.4",
     "@polkadot/react-identicon": "^0.76.1",
     "@types/d3-array": "^2.12.1",
     "@types/d3-time-format": "^3.0.0",
