@@ -1,11 +1,15 @@
 import React, { FC } from "react";
-import { GroupedWallet } from "../../utils/types";
+import { useSelector } from "react-redux";
+import { CustomState } from "../../store/store";
+import { Asset, GroupedWallet } from "../../utils/types";
+import OverviewChart from "../Charts/OverviewChart";
 
 const WalletItem: FC<{ wallet: GroupedWallet }> = ({ wallet }) => {
-  const { icon, name, assets } = wallet;
+  const storeDb = useSelector((state: CustomState) => state.db);
+  const { icon, name, assets, id } = wallet;
   return (
-    <div className="board flex items-center justify-between">
-      <div className="flex items-center">
+    <div className="board flex items-start justify-between relative h-28">
+      <div className="flex items-start z-10">
         <div className="flex relative bg-orange-500 justify-center items-center w-12 h-12">
           <img className="rounded-full w-12 h-12" alt={name} src={icon} />
         </div>
@@ -16,7 +20,14 @@ const WalletItem: FC<{ wallet: GroupedWallet }> = ({ wallet }) => {
           }`}</p>
         </div>
       </div>
-      <div></div>
+      <div className=""></div>
+      {storeDb ? (
+        <OverviewChart
+          ids={assets.map((asset: Asset) => asset.cgId as string)}
+          assets={assets}
+          isWallet
+        />
+      ) : null}
     </div>
   );
 };

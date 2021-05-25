@@ -35,10 +35,11 @@ const TimeFrameControls: FC<TimeFrameProps> = ({
   );
 };
 
-const ChartContainer: FC<{ ids: string[]; assets: Asset[] }> = ({
-  ids,
-  assets,
-}) => {
+const ChartContainer: FC<{
+  ids: string[];
+  assets: Asset[];
+  isWallet?: boolean;
+}> = ({ ids, assets, isWallet }) => {
   const dispatch = useDispatch();
 
   //Store data
@@ -64,8 +65,8 @@ const ChartContainer: FC<{ ids: string[]; assets: Asset[] }> = ({
           label: "# of Votes",
           data: prices,
           fill: "start",
-          backgroundColor: "#ffd0ea",
-          borderColor: "#eb7cb8",
+          backgroundColor: isWallet ? "#7194f3" : "#ffd0ea",
+          borderColor: isWallet ? "#0a72eb" : "#eb7cb8",
         },
       ],
     });
@@ -119,63 +120,70 @@ const ChartContainer: FC<{ ids: string[]; assets: Asset[] }> = ({
     interaction: { intersect: false },
   };
 
-  return (
-    <div className={"h-44"}>
-      <div className="w-full">
-        <div className="rounded-lg shadow mb-4">
-          <div className="rounded-lg bg-white relative overflow-hidden">
-            <div className="px-3 pt-8 pb-10 text-center relative z-10">
-              <TimeFrameControls
-                selectedTimeFrame={timeFrame}
-                setTimeFrame={setTimeFrame}
-              />
-              <div
-                className={
-                  prices?.status?.loading ? "animate-pulse" : "animate-none"
-                }
-              >
-                <h4 className="text-sm uppercase text-gray-500 leading-tight">
-                  Total assets
-                </h4>
-                <h3 className="text-3xl text-gray-700 font-semibold leading-tight my-3">
-                  {finalPrice?.toFixed(2) + " " + formatCurrency(currency)}
-                </h3>
-                <p
-                  className={`text-xs leading-tight ${
-                    priceChange >= 0 ? "text-green-500" : "text-red-500"
-                  }`}
+  if (isWallet) {
+    return (
+      <div className={"absolute bottom-0 left-0 w-full h-1/2 z-0 opacity-25"}>
+        {!prices?.status?.loading && data ? (
+          <Line type="line" data={data} options={options} height={128} />
+        ) : null}
+      </div>
+    );
+  } else {
+    return (
+      <div className={"h-44"}>
+        <div className="w-full">
+          <div className="rounded-lg shadow mb-4">
+            <div className="rounded-lg bg-white relative overflow-hidden">
+              <div className="px-3 pt-8 pb-10 text-center relative z-10">
+                <TimeFrameControls
+                  selectedTimeFrame={timeFrame}
+                  setTimeFrame={setTimeFrame}
+                />
+                <div
+                  className={
+                    prices?.status?.loading ? "animate-pulse" : "animate-none"
+                  }
                 >
-                  {priceChange >= 0 ? "▲" : "▼"} {priceChange.toFixed(2)}% (
-                  {timeFrame} days)
-                </p>
+                  <h4 className="text-sm uppercase text-gray-500 leading-tight">
+                    Total assets
+                  </h4>
+                  <h3 className="text-3xl text-gray-700 font-semibold leading-tight my-3">
+                    {finalPrice?.toFixed(2) + " " + formatCurrency(currency)}
+                  </h3>
+                  <p
+                    className={`text-xs leading-tight ${
+                      priceChange >= 0 ? "text-green-500" : "text-red-500"
+                    }`}
+                  >
+                    {priceChange >= 0 ? "▲" : "▼"} {priceChange.toFixed(2)}% (
+                    {timeFrame} days)
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="absolute bottom-0 inset-x-0">
-              {!prices?.status?.loading && data ? (
-                <Line type="line" data={data} options={options} height={128} />
-              ) : null}
+              <div className="absolute bottom-0 inset-x-0">
+                {!prices?.status?.loading && data ? (
+                  <Line
+                    type="line"
+                    data={data}
+                    options={options}
+                    height={128}
+                  />
+                ) : null}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 };
 
-const OverviewChart: FC<{ ids: string[]; assets: Asset[] }> = ({
-  ids,
-  assets,
-}) => {
-  return (
-    <div>
-      <ChartContainer ids={ids} assets={assets} />
-      <div
-        className={
-          "flex flex-wrap w-full mb-16 tabular-nums lining-nums space-y-6 flex-col lg:flex-row"
-        }
-      ></div>
-    </div>
-  );
+const OverviewChart: FC<{
+  ids: string[];
+  assets: Asset[];
+  isWallet?: boolean;
+}> = ({ ids, assets, isWallet }) => {
+  return <ChartContainer ids={ids} assets={assets} isWallet={isWallet} />;
 };
 
 export default OverviewChart;

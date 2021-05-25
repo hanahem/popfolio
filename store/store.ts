@@ -166,7 +166,7 @@ export const getSimplePriceURI = (ids: string[]) =>
 export async function getPrices(
   timeFrame: string,
   ids: string[],
-  assets: Asset[]
+  assets: Asset[],
 ): Promise<AnyAction | void> {
   store?.dispatch({
     type: ActionTypes.FETCH_PRICES_REQUEST,

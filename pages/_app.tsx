@@ -14,12 +14,12 @@ export default function App({ Component, pageProps }: AppProps) {
     <Provider store={store}>
       <ToastProvider autoDismiss>
         <Head>
-          <title>Kiwi dApp</title>
+          <title>Popfolio.</title>
           <meta
             name="viewport"
             content="initial-scale=1.0, width=device-width"
           />
-          <link rel="shortcut icon" href="/favicon.ico" />
+          <link rel="shortcut icon" href="/images/lollipop.png" />
           <script src="/node_modules/@lottiefiles/lottie-player/dist/lottie-player.js"></script>
         </Head>
         <SidebarWrapper>
