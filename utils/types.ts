@@ -31,6 +31,10 @@ export interface Portfolio {
   [walletId: string]: Wallet;
 }
 
+export interface GroupedWallet extends Wallet {
+  assets: Asset[];
+};
+
 export type CryptoPrice = {
   date: string;
   close: number;

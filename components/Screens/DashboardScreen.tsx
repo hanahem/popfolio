@@ -1,11 +1,13 @@
-import React, { FC, useEffect } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CustomState, loadDb } from "../../store/store";
 import { lottieAnimation } from "../../utils/animation";
 import { db } from "../../utils/dbInit";
+import { Asset, GroupedWallet, Wallet } from "../../utils/types";
 import OverviewChart from "../Charts/OverviewChart";
 import Title from "../Generics/Title";
+import WalletsGrid from "../WalletsOverview.tsx/WalletsGrid";
 
 const DashboardScreen: FC = () => {
   const lottieRef = useRef(null);
@@ -28,6 +30,21 @@ const DashboardScreen: FC = () => {
     })();
   }, [db]);
 
+  const [groupedAssets, setGroupedAssets] =
+    useState<GroupedWallet[] | undefined>();
+
+  useEffect(() => {
+    if (storeDb?.wallets && storeDb?.assets) {
+      const wallets = storeDb.wallets.map((wallet: Wallet) => ({
+        ...wallet,
+        assets: storeDb.assets.filter(
+          (asset: Asset) => asset.walletId === wallet.id?.toString()
+        ),
+      }));
+      setGroupedAssets(wallets);
+    }
+  }, [storeDb]);
+
   return (
     <div>
       <Title
@@ -43,8 +60,8 @@ const DashboardScreen: FC = () => {
       </div>
       <Title title="Wallets" />
       <div className="mt-4">
-        {storeDb ? (
-          <p>yooo</p>
+        {storeDb && groupedAssets?.length ? (
+          <WalletsGrid wallets={groupedAssets} />
         ) : (
           <div className="h-20 flex-col flex justify-center items-center">
             <lottie-player
