@@ -1,23 +1,9 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  defaultStyles,
-  Tooltip,
-  TooltipWithBounds,
-  withTooltip,
-} from "@visx/tooltip";
-import { timeFormat } from "d3-time-format";
-import { max, extent, bisector } from "d3-array";
-import { curveMonotoneX } from "@visx/curve";
-import { localPoint } from "@visx/event";
-import { LinearGradient } from "@visx/gradient";
-import { GridRows, GridColumns } from "@visx/grid";
-import { scaleTime, scaleLinear } from "@visx/scale";
-import { AreaClosed, Bar, Line } from "@visx/shape";
-import { WithTooltipProvidedProps } from "@visx/tooltip/lib/enhancers/withTooltip";
-import { CryptoPrice, TimeFrame } from "../../utils/types";
+import React, { FC, useEffect, useState } from "react";
+import { Line } from "react-chartjs-2";
 import { useDispatch, useSelector } from "react-redux";
-import { CustomState, getPrices } from "../../store/store";
-import { FRAMES } from "../../utils";
+import { Currencies, CustomState, getPrices } from "../../store/store";
+import { formatCurrency, FRAMES } from "../../utils";
+import { Asset, TimeFrame } from "../../utils/types";
 
 type TimeFrameProps = {
   selectedTimeFrame: string;
@@ -29,20 +15,18 @@ const TimeFrameControls: FC<TimeFrameProps> = ({
   setTimeFrame,
 }) => {
   return (
-    <div className="absolute top-4 left-4">
+    <div className="absolute top-2 left-2">
       <div className="grid grid-cols-4 grid-rows-1 gap-1">
         {FRAMES.map((frame: TimeFrame, idx: number) => {
           return (
             <div
               key={idx}
-              className={`bg-white bg-opacity-75 hover:bg-opacity-100 p-1 flex justify-center items-center cursor-pointer ${
-                selectedTimeFrame === frame.value
-                  ? "bg-opacity-100 border border-gray-400"
-                  : ""
+              className={`bg-white bg-opacity-75 rounded-sm hover:bg-brand-100 p-1 flex justify-center items-center cursor-pointer ${
+                selectedTimeFrame === frame.value ? "bg-brand-100 border" : ""
               }`}
               onClick={() => setTimeFrame(frame.value)}
             >
-              <p className="text-gray-600 text-sm">{frame.label}</p>
+              <p className="text-gray-600 text-xs">{frame.label}</p>
             </div>
           );
         })}
@@ -51,251 +35,147 @@ const TimeFrameControls: FC<TimeFrameProps> = ({
   );
 };
 
-type TooltipData = CryptoPrice;
+const ChartContainer: FC<{ ids: string[]; assets: Asset[] }> = ({
+  ids,
+  assets,
+}) => {
+  const dispatch = useDispatch();
 
-export const background = "white";
-export const background2 = "white";
-export const accentColor = "#1D4ED8";
-export const accentColorDark = "#1D4ED8";
-const tooltipStyles = {
-  ...defaultStyles,
-  background,
-  border: "1px solid white",
-  color: "#1D4ED8",
-};
+  //Store data
+  const prices = useSelector((state: CustomState) => state.prices);
+  const currency = useSelector((state: CustomState) => state.currency);
 
-// util
-const formatDate = timeFormat("%b %d, '%y");
+  //Local state
+  const [data, set_data] = useState<any>(undefined);
+  const [timeFrame, setTimeFrame] = useState("30");
+  const [finalPrice, setFinalPrice] = useState(0);
+  const [priceChange, setPriceChange] = useState(0);
 
-// accessors
-const getDate = (d: CryptoPrice) => new Date(d.date);
-const getStockValue = (d: CryptoPrice) => d.close;
-const bisectDate = bisector<CryptoPrice, Date>((d) => new Date(d.date)).left;
-
-export type AreaProps = {
-  width: number;
-  height: number;
-  margin?: { top: number; right: number; bottom: number; left: number };
-};
-
-export default withTooltip<AreaProps, TooltipData>(
-  ({
-    width,
-    height,
-    margin = { top: 0, right: 0, bottom: 0, left: 0 },
-    showTooltip,
-    hideTooltip,
-    tooltipData,
-    tooltipTop = 0,
-    tooltipLeft = 0,
-  }: AreaProps & WithTooltipProvidedProps<TooltipData>) => {
-    if (width < 10) return null;
-
-    const dispatch = useDispatch();
-    const [stock, setStock] = useState([
-      { date: new Date().toISOString(), close: 0 },
-    ]);
-    const prices = useSelector((state: CustomState) => state.prices);
-
-    const [selectedTimeFrame, setTimeFrame] = useState("max");
-
-    useEffect(() => {
-      (async function () {
-        try {
-          await dispatch(getPrices(selectedTimeFrame));
-        } catch (e) {
-          console.error("getPrices error: ", e);
-        }
-      })();
-    }, [selectedTimeFrame]);
-
-    useEffect(() => {
-      if (prices.data.prices) {
-        setStock(
-          prices.data.prices.map((p: number[]) => ({
-            date: new Date(p[0]).toISOString(),
-            close: p[1],
-          }))
-        );
-      }
-    }, [prices.data]);
-
-    // bounds
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
-
-    // scales
-    const dateScale = useMemo(
-      () =>
-        scaleTime({
-          range: [margin.left, innerWidth + margin.left],
-          domain: extent(stock, getDate) as [Date, Date],
-        }),
-      [innerWidth, margin.left, stock]
-    );
-    const stockValueScale = useMemo(
-      () =>
-        scaleLinear({
-          range: [innerHeight + margin.top, margin.top],
-          domain: [0, (max(stock, getStockValue) || 0) + innerHeight / 3],
-          nice: true,
-        }),
-      [margin.top, innerHeight, stock]
-    );
-
-    // tooltip handler
-    const handleTooltip = useCallback(
-      (
-        event:
-          | React.TouchEvent<SVGRectElement>
-          | React.MouseEvent<SVGRectElement>
-      ) => {
-        const { x } = localPoint(event) || { x: 0 };
-        const x0 = dateScale.invert(x);
-        const index = bisectDate(stock, x0, 1);
-        const d0 = stock[index - 1];
-        const d1 = stock[index];
-        let d = d0;
-        if (d1 && getDate(d1)) {
-          d =
-            x0.valueOf() - getDate(d0).valueOf() >
-            getDate(d1).valueOf() - x0.valueOf()
-              ? d1
-              : d0;
-        }
-        showTooltip({
-          tooltipData: d,
-          tooltipLeft: x,
-          tooltipTop: stockValueScale(getStockValue(d)),
-        });
-      },
-      [showTooltip, stockValueScale, dateScale, stock]
-    );
-
-    return (
-      <div className="relative">
-        <svg width={width} height={height}>
-          <rect
-            x={0}
-            y={0}
-            width={width}
-            height={height}
-            fill="url(#area-background-gradient)"
-            rx={0}
-          />
-          <LinearGradient
-            id="area-background-gradient"
-            from={background}
-            to={background2}
-          />
-          <LinearGradient
-            id="area-gradient"
-            from={accentColor}
-            to={accentColor}
-            // toOpacity={0.1}
-          />
-          <GridRows
-            left={margin.left}
-            scale={stockValueScale}
-            width={innerWidth}
-            strokeDasharray="1,3"
-            stroke={accentColor}
-            strokeOpacity={0}
-            pointerEvents="none"
-          />
-          <GridColumns
-            top={margin.top}
-            scale={dateScale}
-            height={innerHeight}
-            strokeDasharray="1,3"
-            stroke={accentColor}
-            strokeOpacity={0.2}
-            pointerEvents="none"
-          />
-          <AreaClosed<CryptoPrice>
-            data={stock}
-            x={(d) => dateScale(getDate(d)) ?? 0}
-            y={(d) => stockValueScale(getStockValue(d)) ?? 0}
-            yScale={stockValueScale}
-            strokeWidth={1}
-            stroke="url(#area-gradient)"
-            fill="url(#area-gradient)"
-            curve={curveMonotoneX}
-          />
-          <Bar
-            x={margin.left}
-            y={margin.top}
-            width={innerWidth}
-            height={innerHeight}
-            fill="transparent"
-            rx={14}
-            onTouchStart={handleTooltip}
-            onTouchMove={handleTooltip}
-            onMouseMove={handleTooltip}
-            onMouseLeave={() => hideTooltip()}
-          />
-          {tooltipData && (
-            <g>
-              <Line
-                from={{ x: tooltipLeft, y: margin.top }}
-                to={{ x: tooltipLeft, y: innerHeight + margin.top }}
-                stroke={accentColorDark}
-                strokeWidth={2}
-                pointerEvents="none"
-                strokeDasharray="5,2"
-              />
-              <circle
-                cx={tooltipLeft}
-                cy={tooltipTop + 1}
-                r={4}
-                fill="black"
-                fillOpacity={0.1}
-                stroke="black"
-                strokeOpacity={0.1}
-                strokeWidth={2}
-                pointerEvents="none"
-              />
-              <circle
-                cx={tooltipLeft}
-                cy={tooltipTop}
-                r={4}
-                fill={accentColorDark}
-                stroke="white"
-                strokeWidth={2}
-                pointerEvents="none"
-              />
-            </g>
-          )}
-        </svg>
-        {tooltipData && (
-          <div>
-            <TooltipWithBounds
-              key={Math.random()}
-              top={tooltipTop - 12}
-              left={tooltipLeft + 12}
-              style={tooltipStyles}
-            >
-              {`$${getStockValue(tooltipData)}`}
-            </TooltipWithBounds>
-            <Tooltip
-              top={innerHeight + margin.top - 14}
-              left={tooltipLeft}
-              style={{
-                ...defaultStyles,
-                minWidth: 72,
-                textAlign: "center",
-                transform: "translateX(-50%)",
-              }}
-            >
-              {formatDate(getDate(tooltipData))}
-            </Tooltip>
-          </div>
-        )}
-        <TimeFrameControls
-          selectedTimeFrame={selectedTimeFrame}
-          setTimeFrame={setTimeFrame}
-        />
-      </div>
-    );
+  //Functions
+  async function fetchData(
+    prices: number[][],
+    currentPrice: { [currency: string]: number },
+    currency: Currencies
+  ) {
+    set_data({
+      labels: prices?.map((p: number[]) => p[0]),
+      datasets: [
+        {
+          label: "# of Votes",
+          data: prices,
+          fill: "start",
+          backgroundColor: "#ffd0ea",
+          borderColor: "#eb7cb8",
+        },
+      ],
+    });
+    const firstPrice = prices[0][1];
+    const lastPrice = currentPrice[currency];
+    setFinalPrice(lastPrice);
+    setPriceChange(((lastPrice - firstPrice) / firstPrice) * 100);
   }
-);
+
+  //Effects
+  useEffect(() => {
+    (async function () {
+      try {
+        await dispatch(getPrices(timeFrame, ids, assets));
+      } catch (e) {
+        console.error("getPrices error: ", e);
+      }
+    })();
+  }, [timeFrame]);
+
+  useEffect(() => {
+    if (prices.data && prices.data.length && currency) {
+      fetchData(prices.data, prices.currentTotalAssets, currency);
+    }
+  }, [prices, currency]);
+
+  const options = {
+    maintainAspectRatio: false,
+    plugins: {
+      filler: { propagate: false },
+      title: { display: false },
+      legend: { display: false },
+      tooltip: { enabled: false },
+    },
+    scales: {
+      y: { display: false },
+      x: { display: false },
+    },
+    elements: {
+      point: { radius: 0 },
+    },
+    animations: {
+      tension: {
+        duration: 1000,
+        easing: "linear",
+        from: 1,
+        to: 0,
+        loop: true,
+      },
+    },
+    interaction: { intersect: false },
+  };
+
+  return (
+    <div className={"h-44"}>
+      <div className="w-full">
+        <div className="rounded-lg shadow mb-4">
+          <div className="rounded-lg bg-white relative overflow-hidden">
+            <div className="px-3 pt-8 pb-10 text-center relative z-10">
+              <TimeFrameControls
+                selectedTimeFrame={timeFrame}
+                setTimeFrame={setTimeFrame}
+              />
+              <div
+                className={
+                  prices?.status?.loading ? "animate-pulse" : "animate-none"
+                }
+              >
+                <h4 className="text-sm uppercase text-gray-500 leading-tight">
+                  Total assets
+                </h4>
+                <h3 className="text-3xl text-gray-700 font-semibold leading-tight my-3">
+                  {finalPrice?.toFixed(2) + " " + formatCurrency(currency)}
+                </h3>
+                <p
+                  className={`text-xs leading-tight ${
+                    priceChange >= 0 ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {priceChange >= 0 ? "▲" : "▼"} {priceChange.toFixed(2)}% (
+                  {timeFrame} days)
+                </p>
+              </div>
+            </div>
+            <div className="absolute bottom-0 inset-x-0">
+              {!prices?.status?.loading && data ? (
+                <Line type="line" data={data} options={options} height={128} />
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const OverviewChart: FC<{ ids: string[]; assets: Asset[] }> = ({
+  ids,
+  assets,
+}) => {
+  return (
+    <div>
+      <ChartContainer ids={ids} assets={assets} />
+      <div
+        className={
+          "flex flex-wrap w-full mb-16 tabular-nums lining-nums space-y-6 flex-col lg:flex-row"
+        }
+      ></div>
+    </div>
+  );
+};
+
+export default OverviewChart;

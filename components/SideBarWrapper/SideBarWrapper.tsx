@@ -26,7 +26,7 @@ const SidebarWrapper: FC<{ children: ReactNode }> = ({ children }) => {
               alt="Sidebar icon"
               className="p-2 h-2/3 w-2/3"
             />
-            <p className="font-semibold text-3xl">Popfolio.</p>
+            <p className="font-semibold text-3xl italic">Popfolio.</p>
           </div>
         </div>
         <div className="mt-10 w-full flex flex-col items-center">

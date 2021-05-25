@@ -2,9 +2,8 @@ import axios from "axios";
 import { useMemo } from "react";
 import { createStore, applyMiddleware, Store, AnyAction } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
-import { factorAssetPrices } from "../utils";
-import { db } from "../utils/dbInit";
-import { Asset } from "../utils/types";
+import { db, PortfolioDataBase } from "../utils/dbInit";
+import { Asset, Assets, Wallet } from "../utils/types";
 
 export enum Currencies {
   USD = "usd",
@@ -15,6 +14,7 @@ export enum ActionTypes {
   FETCH_PRICES_REQUEST = "FETCH_PRICES_REQUEST",
   FETCH_PRICES_FAILURE = "FETCH_PRICES_FAILURE",
   FETCH_PRICES_SUCCESS = "FETCH_PRICES_SUCCESS",
+  LOAD_DB_SUCCESS = "LOAD_DB_SUCCESS",
 }
 
 let store: Store | undefined;
@@ -23,6 +23,9 @@ export type CustomState = {
   currency: Currencies;
   prices: {
     data: any;
+    currentTotalAssets: {
+      [currecyName: string]: number;
+    };
     status: {
       success: boolean;
       loading: boolean;
@@ -30,12 +33,23 @@ export type CustomState = {
       errorMessage: string;
     };
   };
+  db:
+    | {
+        wallets: Wallet[];
+        assets: Asset[];
+        plainAssets: string[];
+      }
+    | undefined;
 };
 
 const initialState: CustomState = {
   currency: Currencies.USD,
   prices: {
     data: {},
+    currentTotalAssets: {
+      eur: 0.0,
+      usd: 0.0,
+    },
     status: {
       success: false,
       loading: false,
@@ -43,6 +57,7 @@ const initialState: CustomState = {
       errorMessage: "",
     },
   },
+  db: undefined,
 };
 
 const reducer = (state = initialState, action: AnyAction) => {
@@ -52,10 +67,12 @@ const reducer = (state = initialState, action: AnyAction) => {
         ...state,
         prices: {
           ...state.prices,
-          success: false,
-          loading: true,
-          error: false,
-          errorMessage: "",
+          status: {
+            success: false,
+            loading: true,
+            error: false,
+            errorMessage: "",
+          },
         },
       };
     case ActionTypes.FETCH_PRICES_FAILURE:
@@ -63,10 +80,12 @@ const reducer = (state = initialState, action: AnyAction) => {
         ...state,
         prices: {
           ...state.prices,
-          success: false,
-          loading: false,
-          error: true,
-          errorMessage: action.payload.errorMessage,
+          status: {
+            success: false,
+            loading: false,
+            error: true,
+            errorMessage: action.payload.errorMessage,
+          },
         },
       };
     case ActionTypes.FETCH_PRICES_SUCCESS:
@@ -74,11 +93,19 @@ const reducer = (state = initialState, action: AnyAction) => {
         ...state,
         prices: {
           data: action.payload.prices,
-          success: true,
-          loading: false,
-          error: false,
-          errorMessage: "",
+          currentTotalAssets: action.payload.currentTotalAssets,
+          status: {
+            success: true,
+            loading: false,
+            error: false,
+            errorMessage: "",
+          },
         },
+      };
+    case ActionTypes.LOAD_DB_SUCCESS:
+      return {
+        ...state,
+        db: action.payload,
       };
     default:
       return state;
@@ -124,27 +151,30 @@ export function useStore(initialState: any) {
  ** Actions utils
  */
 
-export const getMarketChartUri = (coinId: string, days: string) =>
+export const getMarketChartURI = (coinId: string, days: string) =>
   `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${
     store?.getState().currency
   }&days=${days}`;
+
+export const getSimplePriceURI = (ids: string[]) =>
+  `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd,eur`;
 
 /*
  ** Price Actions
  */
 
-export async function getPrices(timeFrame: string): Promise<AnyAction | void> {
+export async function getPrices(
+  timeFrame: string,
+  ids: string[],
+  assets: Asset[]
+): Promise<AnyAction | void> {
   store?.dispatch({
     type: ActionTypes.FETCH_PRICES_REQUEST,
   });
 
-  //TODO: integrate with function call
-  const assets = await db.assets.toArray();
-  const ids = ["ethereum", "bitcoin"];
-
-  if (assets && assets.length) {
+  if (ids && assets && assets.length) {
     await Promise.all(
-      ids.map((id) => axios.get(getMarketChartUri(id, timeFrame)))
+      ids.map((id) => axios.get(getMarketChartURI(id, timeFrame)))
     )
       // SUCCESS
       .then(async (res) => {
@@ -154,10 +184,24 @@ export async function getPrices(timeFrame: string): Promise<AnyAction | void> {
           }))
         );
 
-        //TODO: remove on itegration with user assets
-        const assetsAmounts: { [key: string]: number } = {
-          ethereum: 3.04,
-          bitcoin: 2.05,
+        const assetsAmounts: { [key: string]: number } = assets.reduce(
+          (obj, item) =>
+            Object.assign(obj, {
+              [item.cgId as string]: item.amount as number,
+            }),
+          {}
+        );
+
+        const aggPrices = await axios
+          .get(getSimplePriceURI(ids))
+          .then((r) => r.data);
+        const currentTotalAssets = {
+          eur: Object.keys(aggPrices)
+            .map((key) => aggPrices[key].eur * assetsAmounts[key])
+            .reduce((a, b) => a + b),
+          usd: Object.keys(aggPrices)
+            .map((key) => aggPrices[key].usd * assetsAmounts[key])
+            .reduce((a, b) => a + b),
         };
 
         const aggTimes = ids.map((id, idx) => data[idx][id].map((dt) => dt[0]));
@@ -180,14 +224,17 @@ export async function getPrices(timeFrame: string): Promise<AnyAction | void> {
         //Fully computed prices with shortest array timestamps
         const compPrices = shortestArray.map((sa: number, idx: number) => [
           sa,
-          pricesMatrix[0].map((_, jdx: number) =>
+          pricesMatrix[0].map((_: null, jdx: number) =>
             pricesMatrix.reduce((sum, curr) => sum + curr[jdx], 0)
           )[idx],
         ]);
 
         return store?.dispatch({
           type: ActionTypes.FETCH_PRICES_SUCCESS,
-          payload: { prices: compPrices },
+          payload: {
+            prices: compPrices,
+            currentTotalAssets: currentTotalAssets,
+          },
         });
       })
       // FAILURE
@@ -204,6 +251,23 @@ export async function getPrices(timeFrame: string): Promise<AnyAction | void> {
       payload: {
         errorMessage:
           "You don't have assets in your portfolio. Add some from your profile board.",
+      },
+    });
+  }
+}
+
+export async function loadDb(db: PortfolioDataBase): Promise<void> {
+  const assets = await db.assets.toArray();
+  const wallets = await db.wallets.toArray();
+  if (db) {
+    store?.dispatch({
+      type: ActionTypes.LOAD_DB_SUCCESS,
+      payload: {
+        wallets,
+        assets,
+        plainAssets: assets
+          .map((a) => a.cgId)
+          .filter((item, i, ar) => ar.indexOf(item) === i),
       },
     });
   }

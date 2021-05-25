@@ -23,15 +23,6 @@ export function formatCurrency(currency: Currencies): string {
   return currency === Currencies.EUR ? "€" : "$";
 }
 
-export function factorAssetPrices(
-  assetsPrices: { [key: string]: number[][] },
-  assetsAmounts: { [key: string]: number }
-) {
-  return Object.keys(assetsPrices).map((id) => {
-    return assetsPrices[id].map(v => [assetsPrices[id][0], assetsAmounts[id] * v[1]]);
-  });
-}
-
 /*
  ** Utils constants
  */
