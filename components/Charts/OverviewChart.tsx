@@ -65,8 +65,8 @@ const ChartContainer: FC<{
           label: "# of Votes",
           data: prices,
           fill: "start",
-          backgroundColor: isWallet ? "#7194f3" : "#ffd0ea",
-          borderColor: isWallet ? "#0a72eb" : "#eb7cb8",
+          backgroundColor: "#ffd0ea",
+          borderColor: "#eb7cb8",
         },
       ],
     });
