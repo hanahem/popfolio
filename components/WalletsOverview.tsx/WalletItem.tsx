@@ -17,7 +17,7 @@ const WalletItem: FC<{ wallet: GroupedWallet }> = ({ wallet }) => {
       <div className="flex items-start z-10">
         <div className="flex relative bg-orange-500 justify-center items-center w-12 h-12">
           <ColorExtractor src={icon} getColors={getColors}/>
-            <img className="rounded-full w-12 h-12" alt={name} src={icon} />
+            <img className="rounded-full w-12 h-12 p-1" style={{borderColor: colors[1], borderWidth: '2px'}} alt={name} src={icon} />
         </div>
         <div className="flex flex-col items-start ml-6">
           <p className="font-semibold">{name}</p>
