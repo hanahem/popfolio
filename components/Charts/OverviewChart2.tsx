@@ -1,15 +1,48 @@
-import React, { useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { useDispatch, useSelector } from "react-redux";
 import { CustomState, getPrices } from "../../store/store";
-import { formatCurrency } from "../../utils";
+import { formatCurrency, FRAMES } from "../../utils";
+import { TimeFrame } from "../../utils/types";
+
+type TimeFrameProps = {
+  selectedTimeFrame: string;
+  setTimeFrame: (v: string) => void;
+};
+
+const TimeFrameControls: FC<TimeFrameProps> = ({
+  selectedTimeFrame,
+  setTimeFrame,
+}) => {
+  return (
+    <div className="absolute top-2 left-2">
+      <div className="grid grid-cols-4 grid-rows-1 gap-1">
+        {FRAMES.map((frame: TimeFrame, idx: number) => {
+          return (
+            <div
+              key={idx}
+              className={`bg-white bg-opacity-75 rounded hover:bg-brand-100 p-1 flex justify-center items-center cursor-pointer ${
+                selectedTimeFrame === frame.value
+                  ? "bg-brand-100 border"
+                  : ""
+              }`}
+              onClick={() => setTimeFrame(frame.value)}
+            >
+              <p className="text-gray-600 text-xs">{frame.label}</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 function Example() {
   const dispatch = useDispatch();
   const [data, set_data] = useState<any>(undefined);
   const prices = useSelector((state: CustomState) => state.prices);
   const currency = useSelector((state: CustomState) => state.currency);
-  const timeFrame = "30";
+  const [timeFrame, setTimeFrame] = useState("30");
   const [finalPrice, setFinalPrice] = useState(0);
   const [priceChange, setPriceChange] = useState(0);
 
@@ -21,9 +54,9 @@ function Example() {
         console.error("getPrices error: ", e);
       }
     })();
-  }, []);
+  }, [timeFrame]);
 
-  async function fetchData(prices: any) {
+  async function fetchData(prices: number[][]) {
     set_data({
       labels: prices?.map((p: number[]) => p[0]),
       datasets: [
@@ -72,6 +105,10 @@ function Example() {
         <div className="rounded-lg shadow mb-4">
           <div className="rounded-lg bg-white relative overflow-hidden">
             <div className="px-3 pt-8 pb-10 text-center relative z-10">
+              <TimeFrameControls
+                selectedTimeFrame={timeFrame}
+                setTimeFrame={setTimeFrame}
+              />
               <h4 className="text-sm uppercase text-gray-500 leading-tight">
                 Total assets
               </h4>
