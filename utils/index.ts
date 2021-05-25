@@ -24,12 +24,11 @@ export function formatCurrency(currency: Currencies): string {
 }
 
 export function factorAssetPrices(
-  assetsPrices: { [key: string]: number[] },
+  assetsPrices: { [key: string]: number[][] },
   assetsAmounts: { [key: string]: number }
 ) {
-  Object.keys(assetsPrices).map((id) => {
-    const factorPrice = assetsAmounts[id] * assetsPrices[id][1];
-    return [assetsPrices[id][0], factorPrice];
+  return Object.keys(assetsPrices).map((id) => {
+    return assetsPrices[id].map(v => [assetsPrices[id][0], assetsAmounts[id] * v[1]]);
   });
 }
 

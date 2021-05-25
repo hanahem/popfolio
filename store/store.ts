@@ -2,6 +2,7 @@ import axios from "axios";
 import { useMemo } from "react";
 import { createStore, applyMiddleware, Store, AnyAction } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
+import { factorAssetPrices } from "../utils";
 import { db } from "../utils/dbInit";
 import { Asset } from "../utils/types";
 
@@ -136,15 +137,57 @@ export async function getPrices(timeFrame: string): Promise<AnyAction | void> {
   store?.dispatch({
     type: ActionTypes.FETCH_PRICES_REQUEST,
   });
+
+  //TODO: integrate with function call
   const assets = await db.assets.toArray();
+  const ids = ["ethereum", "bitcoin"];
+
   if (assets && assets.length) {
-    await axios
-      .get(getMarketChartUri("ethereum", timeFrame))
+    await Promise.all(
+      ids.map((id) => axios.get(getMarketChartUri(id, timeFrame)))
+    )
       // SUCCESS
-      .then((res) => {
+      .then(async (res) => {
+        const data: { [id: string]: number[][] }[] = await Promise.all(
+          res.map((r) => ({
+            [r.request.responseURL.split("/")[6]]: r.data.prices,
+          }))
+        );
+
+        //TODO: remove on itegration with user assets
+        const assetsAmounts: { [key: string]: number } = {
+          ethereum: 3.04,
+          bitcoin: 2.05,
+        };
+
+        const aggTimes = ids.map((id, idx) => data[idx][id].map((dt) => dt[0]));
+        const shortestArray = aggTimes.reduce((prev, next) =>
+          prev.length > next.length ? next : prev
+        );
+
+        const objData = { ...data.map((dt, idx) => dt[ids[idx]]) };
+        const objDataArray = Object.keys(objData).map((k) => objData[k]);
+
+        //Array of price arrays for each asset in crypto
+        const basePricesMatrix = objDataArray
+          .map((oba) => [oba.map((p: number[]) => p[1])])
+          .map((pm) => pm[0]);
+        //Array of price arrays for each asset in fiat based on amount
+        const pricesMatrix = basePricesMatrix.map((pm, idx) =>
+          pm.map((val: number) => val * assetsAmounts[ids[idx]])
+        );
+
+        //Fully computed prices with shortest array timestamps
+        const compPrices = shortestArray.map((sa: number, idx: number) => [
+          sa,
+          pricesMatrix[0].map((_, jdx: number) =>
+            pricesMatrix.reduce((sum, curr) => sum + curr[jdx], 0)
+          )[idx],
+        ]);
+
         return store?.dispatch({
           type: ActionTypes.FETCH_PRICES_SUCCESS,
-          payload: { prices: res.data },
+          payload: { prices: compPrices },
         });
       })
       // FAILURE

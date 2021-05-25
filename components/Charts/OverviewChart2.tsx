@@ -22,9 +22,7 @@ const TimeFrameControls: FC<TimeFrameProps> = ({
             <div
               key={idx}
               className={`bg-white bg-opacity-75 rounded hover:bg-brand-100 p-1 flex justify-center items-center cursor-pointer ${
-                selectedTimeFrame === frame.value
-                  ? "bg-brand-100 border"
-                  : ""
+                selectedTimeFrame === frame.value ? "bg-brand-100 border" : ""
               }`}
               onClick={() => setTimeFrame(frame.value)}
             >
@@ -77,7 +75,7 @@ function Example() {
 
   useEffect(() => {
     if (prices.data) {
-      fetchData(prices.data.prices);
+      fetchData(prices.data);
     }
   }, [prices]);
 
