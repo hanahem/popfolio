@@ -1,6 +1,6 @@
 import { ParentSize } from "@visx/responsive";
 import React, { FC } from "react";
-import OverviewChart from "../Charts/OverviewChart";
+import OverviewChart2 from "../Charts/OverviewChart2";
 import Title from "../Generics/Title";
 
 const DashboardScreen: FC = () => {
@@ -11,11 +11,12 @@ const DashboardScreen: FC = () => {
         subtitle="An overview of your portfolio and assets performance"
       />
       <div className="flex flex-col mt-8 w-full h-80">
-        <ParentSize>
+        {/* <ParentSize>
           {({ width, height }) => (
             <OverviewChart width={width} height={height} />
           )}
-        </ParentSize>
+        </ParentSize> */}
+        <OverviewChart2 />
       </div>
     </div>
   );
