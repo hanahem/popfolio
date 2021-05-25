@@ -10,7 +10,7 @@ const ProfileScreen: FC = () => {
         title="Profile"
         subtitle="Here you can manage your wallets and assets"
       />
-      <div className="grid grid-cols-1 2xl:grid-cols-2 gap-4 mt-8">
+      <div className="grid grid-cols-1 2xl:grid-cols-2 gap-8 mt-8">
         <AddWallet />
         <AddAsset />
       </div>

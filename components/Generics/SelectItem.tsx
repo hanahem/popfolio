@@ -5,7 +5,7 @@ type Props = { icon?: string; title: string; subtitle?: string };
 
 const SelectItem: FC<Props> = ({ icon, title, subtitle }) => {
   return (
-    <div className="flex flex-col w-full hover:bg-blue-100">
+    <div className="flex flex-col w-full hover:bg-brand-100">
       <div className="cursor-pointer w-full border-gray-100 border-b hover:bg-teal-100">
         <div className="flex w-full items-center p-2 pl-2 border-transparent border-l-2 relative hover:border-teal-100">
           <div className="w-10 flex flex-col items-center">
