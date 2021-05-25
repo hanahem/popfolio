@@ -39,7 +39,8 @@ const ChartContainer: FC<{
   ids: string[];
   assets: Asset[];
   isWallet?: boolean;
-}> = ({ ids, assets, isWallet }) => {
+  colors?: string[];
+}> = ({ ids, assets, isWallet, colors }) => {
   const dispatch = useDispatch();
 
   //Store data
@@ -65,11 +66,12 @@ const ChartContainer: FC<{
           label: "# of Votes",
           data: prices,
           fill: "start",
-          backgroundColor: isWallet ? "#7194f3" : "#ffd0ea",
-          borderColor: isWallet ? "#0a72eb" : "#eb7cb8",
+          backgroundColor: colors ? colors[1] : "#ffd0ea",
+          borderColor: colors ? colors[0] : "#eb7cb8",
         },
       ],
     });
+    console.log(colors?.[2])
     const firstPrice = prices[0][1];
     const lastPrice = currentPrice[currency];
     setFinalPrice(lastPrice);
@@ -122,7 +124,7 @@ const ChartContainer: FC<{
 
   if (isWallet) {
     return (
-      <div className={"absolute bottom-0 left-0 w-full h-1/2 z-0 opacity-25"}>
+      <div className={"absolute bottom-0 left-0 w-full h-1/2 z-0"}>
         {!prices?.status?.loading && data ? (
           <Line type="line" data={data} options={options} height={128} />
         ) : null}
@@ -182,8 +184,16 @@ const OverviewChart: FC<{
   ids: string[];
   assets: Asset[];
   isWallet?: boolean;
-}> = ({ ids, assets, isWallet }) => {
-  return <ChartContainer ids={ids} assets={assets} isWallet={isWallet} />;
+  colors?: string[];
+}> = ({ ids, assets, isWallet, colors }) => {
+  return (
+    <ChartContainer
+      ids={ids}
+      assets={assets}
+      isWallet={isWallet}
+      colors={colors}
+    />
+  );
 };
 
 export default OverviewChart;
