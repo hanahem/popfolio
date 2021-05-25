@@ -1,3 +1,4 @@
+import { Currencies } from "../store/store";
 import { TimeFrame, Wallet } from "./types";
 
 /*
@@ -16,6 +17,10 @@ export function fromEntries<T>(entries: [keyof T, T[keyof T]][]): T {
     (acc, [key, value]) => ({ ...acc, [key]: value }),
     <T>{}
   );
+}
+
+export function formatCurrency(currency: Currencies): string {
+  return currency === Currencies.EUR ? "€" : "$";
 }
 
 /*

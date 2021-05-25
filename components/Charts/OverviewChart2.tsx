@@ -2,16 +2,21 @@ import React, { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { useDispatch, useSelector } from "react-redux";
 import { CustomState, getPrices } from "../../store/store";
+import { formatCurrency } from "../../utils";
 
 function Example() {
   const dispatch = useDispatch();
   const [data, set_data] = useState<any>(undefined);
   const prices = useSelector((state: CustomState) => state.prices);
+  const currency = useSelector((state: CustomState) => state.currency);
+  const timeFrame = "30";
+  const [finalPrice, setFinalPrice] = useState(0);
+  const [priceChange, setPriceChange] = useState(0);
 
   useEffect(() => {
     (async function () {
       try {
-        await dispatch(getPrices("max"));
+        await dispatch(getPrices(timeFrame));
       } catch (e) {
         console.error("getPrices error: ", e);
       }
@@ -26,11 +31,15 @@ function Example() {
           label: "# of Votes",
           data: prices,
           fill: "start",
-          backgroundColor: "rgba(249, 177, 42, 0.5)",
-          borderColor: "rgba(249, 177, 42, 0.6)",
+          backgroundColor: "#ffd0ea",
+          borderColor: "#eb7cb8",
         },
       ],
     });
+    const firstPrice = prices[0][1];
+    const lastPrice = prices[prices.length - 1][1];
+    setFinalPrice(lastPrice);
+    setPriceChange(((lastPrice - firstPrice) / firstPrice) * 100);
   }
 
   useEffect(() => {
@@ -58,12 +67,27 @@ function Example() {
   };
 
   return (
-    <div className={""}>
-      <div className={"h-32 relative"}>
-        <div className={"absolute bottom-0 left-0 right-0 h-20"}>
-          {data ? (
-            <Line type="line" data={data} options={options} height={128} />
-          ) : null}
+    <div className={"h-44"}>
+      <div className="w-full">
+        <div className="rounded-lg shadow mb-4">
+          <div className="rounded-lg bg-white relative overflow-hidden">
+            <div className="px-3 pt-8 pb-10 text-center relative z-10">
+              <h4 className="text-sm uppercase text-gray-500 leading-tight">
+                Total assets
+              </h4>
+              <h3 className="text-3xl text-gray-700 font-semibold leading-tight my-3">
+                {finalPrice?.toFixed(2) + " " + formatCurrency(currency)}
+              </h3>
+              <p className="text-xs text-green-500 leading-tight">
+                ▲ {priceChange.toFixed(2)}% ({timeFrame} days)
+              </p>
+            </div>
+            <div className="absolute bottom-0 inset-x-0">
+              {data ? (
+                <Line type="line" data={data} options={options} height={128} />
+              ) : null}
+            </div>
+          </div>
         </div>
       </div>
     </div>

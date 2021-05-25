@@ -22,11 +22,11 @@ const SidebarWrapper: FC<{ children: ReactNode }> = ({ children }) => {
             onClick={() => router.push("/")}
           >
             <img
-              src="/images/h.png"
+              src="/images/lollipop.png"
               alt="Sidebar icon"
-              className="p-2 h-full w-full"
+              className="p-2 h-2/3 w-2/3"
             />
-            <p className="font-bold text-3xl">Harpy</p>
+            <p className="font-semibold text-3xl">Popfolio.</p>
           </div>
         </div>
         <div className="mt-10 w-full flex flex-col items-center">
