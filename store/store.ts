@@ -49,6 +49,7 @@ export enum ActionTypes {
   LOAD_DB_SUCCESS = "LOAD_DB_SUCCESS",
 
   UPDATE_CURRENCY = "UPDATE_CURRENCY",
+  UPDATE_DARKMODE = "UPDATE_DARKMODE",
 }
 
 let store: Store | undefined;
@@ -151,6 +152,11 @@ const reducer = (state = initialState, action: AnyAction) => {
       return {
         ...state,
         currency: action.payload,
+      };
+      case ActionTypes.UPDATE_DARKMODE:
+      return {
+        ...state,
+        darkMode: action.payload,
       };
     default:
       return state;
@@ -326,5 +332,14 @@ export function updateCurrency(): void {
   store?.dispatch({
     type: ActionTypes.UPDATE_CURRENCY,
     payload: nextCurrency,
+  });
+}
+
+
+export function updateDarkMode(): void {
+  const darkMode = store?.getState().darkMode;
+  store?.dispatch({
+    type: ActionTypes.UPDATE_DARKMODE,
+    payload: !darkMode,
   });
 }

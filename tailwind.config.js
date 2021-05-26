@@ -1,6 +1,6 @@
 module.exports = {
   purge: [],
-  darkMode: false, // or 'media' or 'class'
+  darkMode: 'class', // or 'media' or 'class'
   theme: {
     extend: {
       colors: {
@@ -27,6 +27,10 @@ module.exports = {
         success: "#0CAB2C",
         disabled: "#E6E6E6",
         background: "#fff",
+        //darkmode colors
+        darkbg: "#171531",
+        darkfg: "#211d45",
+        darkgray: "#4b4779"
       },
       borderRadius: {
         DEFAULT: ".5rem",

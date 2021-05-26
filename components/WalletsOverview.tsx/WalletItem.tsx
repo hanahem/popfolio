@@ -25,9 +25,9 @@ const WalletItem: FC<{ wallet: GroupedWallet }> = ({ wallet }) => {
   }, [walletsData, currency]);
 
   return (
-    <div className="board flex items-start justify-between relative h-28">
+    <div className="board flex items-start justify-between relative h-28 overflow-hidden">
       <div className="flex items-start z-10">
-        <div className="flex relative bg-orange-500 justify-center items-center w-12 h-12">
+        <div className="flex relative justify-center items-center w-12 h-12">
           <img className="rounded-full w-12 h-12" alt={name} src={icon} />
         </div>
         <div className="flex flex-col items-start ml-6">
