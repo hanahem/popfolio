@@ -46,7 +46,7 @@ const ChartContainer: FC<{
 
   //Local state
   const [data, set_data] = useState<ChartData | undefined>(undefined);
-  const [timeFrame, setTimeFrame] = useState("30");
+  const [timeFrame, setTimeFrame] = useState("1");
   const [finalPrice, setFinalPrice] = useState(0);
   const [priceChange, setPriceChange] = useState(0);
 

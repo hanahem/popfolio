@@ -202,7 +202,8 @@ export async function getPrices(
           prev.length > next.length ? next : prev,
         );
 
-        const objData = { ...data.map((dt, idx) => dt[ids[idx]]) };
+        /* eslint-disable  @typescript-eslint/no-explicit-any */
+        const objData: { [key: string]: any } = { ...data.map((dt, idx) => dt[ids[idx]]) };
         const objDataArray = Object.keys(objData).map((k) => objData[k]);
 
         //Array of price arrays for each asset in crypto
