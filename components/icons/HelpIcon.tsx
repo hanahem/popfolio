@@ -1,4 +1,3 @@
-
 import React, { FC } from "react";
 
 const HelpIcon: FC<{ color: string }> = ({ color }) => {

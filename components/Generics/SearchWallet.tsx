@@ -25,9 +25,7 @@ const SearchWallet: FC<{
       <div className="relative">
         <input
           className="w-full bg-white cursor-pointer"
-          value={
-            getWalletById(wallets as Wallet[], asset?.walletId as string)?.name
-          }
+          value={getWalletById(wallets as Wallet[], asset?.walletId as string)?.name}
           placeholder="Binance, Coinbase, Metamask 1 ..."
           onFocus={() => setOpenSelectWallet(true)}
           onBlur={() => setOpenSelectWallet(false)}
@@ -41,10 +39,7 @@ const SearchWallet: FC<{
               {wallets ? (
                 wallets.map((w: Wallet) => {
                   return (
-                    <div
-                      key={w.id as number}
-                      onMouseDown={(e) => selectWallet(e, w)}
-                    >
+                    <div key={w.id as number} onMouseDown={(e) => selectWallet(e, w)}>
                       <SelectItem icon={w.icon} title={w.name} />
                     </div>
                   );

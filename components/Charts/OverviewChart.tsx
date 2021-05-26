@@ -1,3 +1,4 @@
+import { ChartData } from "chart.js";
 import React, { FC, useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,10 +11,7 @@ type TimeFrameProps = {
   setTimeFrame: (v: string) => void;
 };
 
-const TimeFrameControls: FC<TimeFrameProps> = ({
-  selectedTimeFrame,
-  setTimeFrame,
-}) => {
+const TimeFrameControls: FC<TimeFrameProps> = ({ selectedTimeFrame, setTimeFrame }) => {
   return (
     <div className="absolute top-2 left-2">
       <div className="grid grid-cols-4 grid-rows-1 gap-1">
@@ -47,23 +45,23 @@ const ChartContainer: FC<{
   const currency = useSelector((state: CustomState) => state.currency);
 
   //Local state
-  const [data, set_data] = useState<any>(undefined);
+  const [data, set_data] = useState<ChartData | undefined>(undefined);
   const [timeFrame, setTimeFrame] = useState("30");
   const [finalPrice, setFinalPrice] = useState(0);
   const [priceChange, setPriceChange] = useState(0);
 
   //Functions
-  async function fetchData(
+  async function updateData(
     prices: number[][],
     currentPrice: { [currency: string]: number },
-    currency: Currencies
+    currency: Currencies,
   ) {
     set_data({
       labels: prices?.map((p: number[]) => p[0]),
       datasets: [
         {
           label: "# of Votes",
-          data: prices,
+          data: prices?.map((p: number[]) => p[1]),
           fill: "start",
           backgroundColor: "#ffd0ea",
           borderColor: "#eb7cb8",
@@ -89,7 +87,7 @@ const ChartContainer: FC<{
 
   useEffect(() => {
     if (prices.data && prices.data.length && currency) {
-      fetchData(prices.data, prices.currentTotalAssets, currency);
+      updateData(prices.data, prices.currentTotalAssets, currency);
     }
   }, [prices, currency]);
 
@@ -135,18 +133,9 @@ const ChartContainer: FC<{
           <div className="rounded-lg shadow mb-4">
             <div className="rounded-lg bg-white relative overflow-hidden">
               <div className="px-3 pt-8 pb-10 text-center relative z-10">
-                <TimeFrameControls
-                  selectedTimeFrame={timeFrame}
-                  setTimeFrame={setTimeFrame}
-                />
-                <div
-                  className={
-                    prices?.status?.loading ? "animate-pulse" : "animate-none"
-                  }
-                >
-                  <h4 className="text-sm uppercase text-gray-500 leading-tight">
-                    Total assets
-                  </h4>
+                <TimeFrameControls selectedTimeFrame={timeFrame} setTimeFrame={setTimeFrame} />
+                <div className={prices?.status?.loading ? "animate-pulse" : "animate-none"}>
+                  <h4 className="text-sm uppercase text-gray-500 leading-tight">Total assets</h4>
                   <h3 className="text-3xl text-gray-700 font-semibold leading-tight my-3">
                     {finalPrice?.toFixed(2) + " " + formatCurrency(currency)}
                   </h3>
@@ -155,19 +144,13 @@ const ChartContainer: FC<{
                       priceChange >= 0 ? "text-green-500" : "text-red-500"
                     }`}
                   >
-                    {priceChange >= 0 ? "▲" : "▼"} {priceChange.toFixed(2)}% (
-                    {timeFrame} days)
+                    {priceChange >= 0 ? "▲" : "▼"} {priceChange.toFixed(2)}% ({timeFrame} days)
                   </p>
                 </div>
               </div>
               <div className="absolute bottom-0 inset-x-0">
                 {!prices?.status?.loading && data ? (
-                  <Line
-                    type="line"
-                    data={data}
-                    options={options}
-                    height={128}
-                  />
+                  <Line type="line" data={data} options={options} height={128} />
                 ) : null}
               </div>
             </div>

@@ -33,7 +33,7 @@ export interface Portfolio {
 
 export interface GroupedWallet extends Wallet {
   assets: Asset[];
-};
+}
 
 export type CryptoPrice = {
   date: string;

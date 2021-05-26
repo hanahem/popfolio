@@ -19,7 +19,7 @@ export class PortfolioDataBase extends Dexie {
    ** Wallets
    */
 
-  addWallet = (wallet: Wallet) => {
+  addWallet = (wallet: Wallet): void => {
     const { walletId, name, icon } = wallet;
     db.wallets
       .add({
@@ -27,12 +27,13 @@ export class PortfolioDataBase extends Dexie {
         name,
         icon,
       })
+      /* eslint-disable  @typescript-eslint/no-explicit-any */
       .catch((e: any) => {
         console.error("error: " + e.stack || e);
       });
   };
 
-  updateWallet = (wallet: Wallet, id: string) => {
+  updateWallet = (wallet: Wallet, id: string): void => {
     db.wallets.where("id").equals(id).modify({ wallet });
   };
 
@@ -40,11 +41,12 @@ export class PortfolioDataBase extends Dexie {
    ** Assets
    */
 
-  updateAsset = (asset: Asset, id: string) => {
+  updateAsset = (asset: Asset, id: string): void => {
     db.assets.where("id").equals(id).modify({ asset });
   };
 
-  addAsset = (asset: Asset) => {
+  addAsset = (asset: Asset): void => {
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
     db.assets.add(asset).catch((e: any) => {
       console.error("error: " + e.stack || e);
     });

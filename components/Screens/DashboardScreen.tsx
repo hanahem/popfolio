@@ -30,16 +30,13 @@ const DashboardScreen: FC = () => {
     })();
   }, [db]);
 
-  const [groupedAssets, setGroupedAssets] =
-    useState<GroupedWallet[] | undefined>();
+  const [groupedAssets, setGroupedAssets] = useState<GroupedWallet[] | undefined>();
 
   useEffect(() => {
     if (storeDb?.wallets && storeDb?.assets) {
       const wallets = storeDb.wallets.map((wallet: Wallet) => ({
         ...wallet,
-        assets: storeDb.assets.filter(
-          (asset: Asset) => asset.walletId === wallet.id?.toString()
-        ),
+        assets: storeDb.assets.filter((asset: Asset) => asset.walletId === wallet.id?.toString()),
       }));
       setGroupedAssets(wallets);
     }
@@ -47,10 +44,7 @@ const DashboardScreen: FC = () => {
 
   return (
     <div>
-      <Title
-        title="Overview"
-        subtitle="An overview of your portfolio and assets performance"
-      />
+      <Title title="Overview" subtitle="An overview of your portfolio and assets performance" />
       <div className="w-full my-8">
         {storeDb ? (
           <OverviewChart ids={storeDb.plainAssets} assets={storeDb.assets} />
@@ -72,9 +66,7 @@ const DashboardScreen: FC = () => {
               src={JSON.stringify(lottieAnimation)}
               className={"absolute inset-0 w-full h-full object-cover"}
             />
-            <p className="text-sm mt-2">
-              You don't have any wallets or assets yet
-            </p>
+            <p className="text-sm mt-2">{"You don't have any wallets or assets yet"}</p>
           </div>
         )}
       </div>

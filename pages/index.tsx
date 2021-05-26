@@ -1,7 +1,7 @@
-import React from "react";
+import React, { FC } from "react";
 import DashboardScreen from "../components/Screens/DashboardScreen";
 
-const IndexPage = () => {
+const IndexPage: FC = () => {
   return (
     <div>
       <DashboardScreen />

@@ -5,18 +5,12 @@ import { TimeFrame, Wallet } from "./types";
  ** Util functions
  */
 
-export function getWalletById(
-  wallets: Wallet[],
-  id: string
-): Wallet | undefined {
+export function getWalletById(wallets: Wallet[], id: string): Wallet | undefined {
   return wallets?.find((w) => w.id?.toString() === id);
 }
 
 export function fromEntries<T>(entries: [keyof T, T[keyof T]][]): T {
-  return entries.reduce(
-    (acc, [key, value]) => ({ ...acc, [key]: value }),
-    <T>{}
-  );
+  return entries.reduce((acc, [key, value]) => ({ ...acc, [key]: value }), <T>{});
 }
 
 export function formatCurrency(currency: Currencies): string {

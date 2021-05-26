@@ -2,8 +2,8 @@ import axios from "axios";
 import { useMemo } from "react";
 import { createStore, applyMiddleware, Store, AnyAction } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
-import { db, PortfolioDataBase } from "../utils/dbInit";
-import { Asset, Assets, Wallet } from "../utils/types";
+import { PortfolioDataBase } from "../utils/dbInit";
+import { Asset, Wallet } from "../utils/types";
 
 export enum Currencies {
   USD = "usd",
@@ -22,6 +22,7 @@ let store: Store | undefined;
 export type CustomState = {
   currency: Currencies;
   prices: {
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
     data: any;
     currentTotalAssets: {
       [currecyName: string]: number;
@@ -113,14 +114,10 @@ const reducer = (state = initialState, action: AnyAction) => {
 };
 
 function initStore(preloadedState = initialState) {
-  return createStore(
-    reducer,
-    preloadedState,
-    composeWithDevTools(applyMiddleware())
-  );
+  return createStore(reducer, preloadedState, composeWithDevTools(applyMiddleware()));
 }
 
-export const initializeStore = (preloadedState: CustomState) => {
+export const initializeStore = (preloadedState: CustomState): Store<any, AnyAction> => {
   let _store = store || initStore(preloadedState);
 
   // After navigating to a page with an initial Redux state, merge that state
@@ -142,7 +139,7 @@ export const initializeStore = (preloadedState: CustomState) => {
   return _store;
 };
 
-export function useStore(initialState: any) {
+export function useStore(initialState: CustomState): Store<any, AnyAction> {
   const store = useMemo(() => initializeStore(initialState), [initialState]);
   return store;
 }
@@ -151,12 +148,12 @@ export function useStore(initialState: any) {
  ** Actions utils
  */
 
-export const getMarketChartURI = (coinId: string, days: string) =>
+export const getMarketChartURI = (coinId: string, days: string): string =>
   `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${
     store?.getState().currency
   }&days=${days}`;
 
-export const getSimplePriceURI = (ids: string[]) =>
+export const getSimplePriceURI = (ids: string[]): string =>
   `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd,eur`;
 
 /*
@@ -173,15 +170,13 @@ export async function getPrices(
   });
 
   if (ids && assets && assets.length) {
-    await Promise.all(
-      ids.map((id) => axios.get(getMarketChartURI(id, timeFrame)))
-    )
+    await Promise.all(ids.map((id) => axios.get(getMarketChartURI(id, timeFrame))))
       // SUCCESS
       .then(async (res) => {
         const data: { [id: string]: number[][] }[] = await Promise.all(
           res.map((r) => ({
             [r.request.responseURL.split("/")[6]]: r.data.prices,
-          }))
+          })),
         );
 
         const assetsAmounts: { [key: string]: number } = assets.reduce(
@@ -189,12 +184,10 @@ export async function getPrices(
             Object.assign(obj, {
               [item.cgId as string]: item.amount as number,
             }),
-          {}
+          {},
         );
 
-        const aggPrices = await axios
-          .get(getSimplePriceURI(ids))
-          .then((r) => r.data);
+        const aggPrices = await axios.get(getSimplePriceURI(ids)).then((r) => r.data);
         const currentTotalAssets = {
           eur: Object.keys(aggPrices)
             .map((key) => aggPrices[key].eur * assetsAmounts[key])
@@ -206,7 +199,7 @@ export async function getPrices(
 
         const aggTimes = ids.map((id, idx) => data[idx][id].map((dt) => dt[0]));
         const shortestArray = aggTimes.reduce((prev, next) =>
-          prev.length > next.length ? next : prev
+          prev.length > next.length ? next : prev,
         );
 
         const objData = { ...data.map((dt, idx) => dt[ids[idx]]) };
@@ -218,14 +211,14 @@ export async function getPrices(
           .map((pm) => pm[0]);
         //Array of price arrays for each asset in fiat based on amount
         const pricesMatrix = basePricesMatrix.map((pm, idx) =>
-          pm.map((val: number) => val * assetsAmounts[ids[idx]])
+          pm.map((val: number) => val * assetsAmounts[ids[idx]]),
         );
 
         //Fully computed prices with shortest array timestamps
         const compPrices = shortestArray.map((sa: number, idx: number) => [
           sa,
           pricesMatrix[0].map((_: null, jdx: number) =>
-            pricesMatrix.reduce((sum, curr) => sum + curr[jdx], 0)
+            pricesMatrix.reduce((sum, curr) => sum + curr[jdx], 0),
           )[idx],
         ]);
 
@@ -249,8 +242,7 @@ export async function getPrices(
     return store?.dispatch({
       type: ActionTypes.FETCH_PRICES_FAILURE,
       payload: {
-        errorMessage:
-          "You don't have assets in your portfolio. Add some from your profile board.",
+        errorMessage: "You don't have assets in your portfolio. Add some from your profile board.",
       },
     });
   }
@@ -265,9 +257,7 @@ export async function loadDb(db: PortfolioDataBase): Promise<void> {
       payload: {
         wallets,
         assets,
-        plainAssets: assets
-          .map((a) => a.cgId)
-          .filter((item, i, ar) => ar.indexOf(item) === i),
+        plainAssets: assets.map((a) => a.cgId).filter((item, i, ar) => ar.indexOf(item) === i),
       },
     });
   }

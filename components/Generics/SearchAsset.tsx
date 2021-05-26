@@ -4,14 +4,12 @@ import SelectItem from "./SelectItem";
 import { ICoinsLite } from "@coingecko/cg-api-ts";
 import { Asset } from "../../utils/types";
 
-const SearchAsset: FC<{ setAsset: (a: Asset) => void; asset?: Asset }> = ({
-  setAsset,
-  asset,
-}) => {
+const SearchAsset: FC<{ setAsset: (a: Asset) => void; asset?: Asset }> = ({ setAsset, asset }) => {
   const [openSelectAsset, setOpenSelectAsset] = useState(false);
 
   const [searchAsset, setSearchAsset] = useState<{
     query: string;
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
     results: any;
     loading: boolean;
     message: string;
@@ -58,7 +56,7 @@ const SearchAsset: FC<{ setAsset: (a: Asset) => void; asset?: Asset }> = ({
           results: res.data.filter(
             (c: ICoinsLite) =>
               c.symbol.includes(query.toLowerCase()) ||
-              c.name.toLowerCase().includes(query.toLowerCase())
+              c.name.toLowerCase().includes(query.toLowerCase()),
           ),
           message: resultNotFoundMsg,
           loading: false,
@@ -118,9 +116,7 @@ const SearchAsset: FC<{ setAsset: (a: Asset) => void; asset?: Asset }> = ({
                     return (
                       <div
                         key={asset.id}
-                        onMouseDown={(e: SyntheticEvent): void =>
-                          selectAsset(e, asset)
-                        }
+                        onMouseDown={(e: SyntheticEvent): void => selectAsset(e, asset)}
                       >
                         <SelectItem
                           icon={asset.image.large}

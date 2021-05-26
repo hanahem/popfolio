@@ -1,5 +1,4 @@
 import React, { FC, SyntheticEvent, useEffect, useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
 import { db } from "../../utils/dbInit";
 import { Asset, Wallet } from "../../utils/types";
 import SearchAsset from "../Generics/SearchAsset";
@@ -45,8 +44,7 @@ const AddAsset: FC = () => {
     <div className="board flex flex-col">
       <p className="text-xl">Add an asset</p>
       <p className="font-light text-sm">
-        You can your assets and the right amounts, then link them to the wallets
-        you created.
+        You can your assets and the right amounts, then link them to the wallets you created.
       </p>
       <form className="mt-4 flex flex-col" onSubmit={() => addAsset(asset)}>
         <SearchAsset setAsset={setAsset} asset={asset} />

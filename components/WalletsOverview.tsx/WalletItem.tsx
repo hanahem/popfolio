@@ -6,7 +6,7 @@ import OverviewChart from "../Charts/OverviewChart";
 
 const WalletItem: FC<{ wallet: GroupedWallet }> = ({ wallet }) => {
   const storeDb = useSelector((state: CustomState) => state.db);
-  const { icon, name, assets, id } = wallet;
+  const { icon, name, assets } = wallet;
   return (
     <div className="board flex items-start justify-between relative h-28">
       <div className="flex items-start z-10">

@@ -17,23 +17,13 @@ const SidebarWrapper: FC<{ children: ReactNode }> = ({ children }) => {
     <div className="bg-white flex min-h-screen w-full">
       <nav className="bg-white w-72 h-screen fixed flex flex-col items-center justify-start border-r-2 border-gray">
         <div className="h-20 w-full">
-          <div
-            className="h-20 w-20 my-3 ml-4 flex items-center"
-            onClick={() => router.push("/")}
-          >
-            <img
-              src="/images/lollipop.png"
-              alt="Sidebar icon"
-              className="p-2 h-2/3 w-2/3"
-            />
+          <div className="h-20 w-20 my-3 ml-4 flex items-center" onClick={() => router.push("/")}>
+            <img src="/images/lollipop.png" alt="Sidebar icon" className="p-2 h-2/3 w-2/3" />
             <p className="font-semibold text-3xl italic">Popfolio.</p>
           </div>
         </div>
         <div className="mt-10 w-full flex flex-col items-center">
-          <div
-            className={`sidenav ${isPath("/") ? "active" : ""}`}
-            onClick={() => goTo("/")}
-          >
+          <div className={`sidenav ${isPath("/") ? "active" : ""}`} onClick={() => goTo("/")}>
             <HomeIcon color="#62686e" />
             <p className="text-sideIcon ml-4">Dashboard</p>
           </div>
