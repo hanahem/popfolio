@@ -53,7 +53,7 @@ const SidebarWrapper: FC<{ children: ReactNode }> = ({ children }) => {
       <div className="bg-gray-50 w-full ml-72">
         <nav className="bg-white h-20 border-b border-gray flex justify-between items-center py-4 px-6">
           <div className="flex items-center">
-            <button className="btn-primary flex items-center">
+            <button className="btn-primary flex items-center" onClick={() => goTo("/profile")}>
               <PlusIcon color="white" />
               Add a wallet or an asset
             </button>
