@@ -1,7 +1,7 @@
 import React, { FC, useEffect } from "react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { CustomState, WalletsPricesType } from "../../store/store";
+import { CustomState } from "../../store/store";
 import { formatCurrency } from "../../utils";
 import { Asset, GroupedWallet } from "../../utils/types";
 import OverviewChart from "../Charts/OverviewChart";
@@ -18,7 +18,7 @@ const WalletItem: FC<{ wallet: GroupedWallet }> = ({ wallet }) => {
   const walletsData = walletsPrices?.[id as number];
 
   useEffect(() => {
-    if (walletsData) {
+    if (walletsData && currency) {
       const firstPrice = walletsData.data[0][1];
       setPriceChange(((walletsData.currentTotalAssets[currency] - firstPrice) / firstPrice) * 100);
     }

@@ -5,6 +5,11 @@ import StatsIcon from "../icons/StatsIcon";
 import ProfileIcon from "../icons/ProfileIcon";
 import HelpIcon from "../icons/HelpIcon";
 import PlusIcon from "../icons/PlusIcon";
+import NightIcon from "../icons/NightIcon";
+import DollarIcon from "../icons/DollarIcon";
+import { Currencies, CustomState, updateCurrency } from "../../store/store";
+import { useSelector } from "react-redux";
+import EuroIcon from "../icons/EuroIcon";
 
 const SidebarWrapper: FC<{ children: ReactNode }> = ({ children }) => {
   const router = useRouter();
@@ -12,6 +17,8 @@ const SidebarWrapper: FC<{ children: ReactNode }> = ({ children }) => {
 
   const isPath = (path: string): boolean => path === pathname;
   const goTo = (path: string): Promise<boolean> => router.push(path);
+
+  const currency = useSelector((state: CustomState) => state.currency);
 
   return (
     <div className="bg-white flex min-h-screen w-full">
@@ -58,8 +65,17 @@ const SidebarWrapper: FC<{ children: ReactNode }> = ({ children }) => {
               Add a wallet or an asset
             </button>
           </div>
-          <div>
-            <p>options</p>
+          <div className="mr-4 grid grid-cols-2 gap-2">
+            <button className="optionbtn" onClick={() => updateCurrency()}>
+              {currency == Currencies.EUR ? (
+                <DollarIcon color="#62686e" />
+              ) : (
+                <EuroIcon color="#62686e" />
+              )}
+            </button>
+            <button className="optionbtn" onClick={() => goTo("/profile")}>
+              <NightIcon color="#62686e" />
+            </button>
           </div>
         </nav>
         <div className="p-12">{children}</div>

@@ -69,8 +69,8 @@ const ChartContainer: FC<{
         },
       ],
     });
-    const firstPrice = prices[0][1];
-    const lastPrice = currentPrice[currency];
+    const firstPrice = prices?.[0][1];
+    const lastPrice = currentPrice?.[currency];
     setFinalPrice(lastPrice);
     setPriceChange(((lastPrice - firstPrice) / firstPrice) * 100);
   }
@@ -97,8 +97,8 @@ const ChartContainer: FC<{
     }
     if (walletsPrices && wallet && wallet.id) {
       updateData(
-        walletsPrices[wallet.id].data,
-        walletsPrices[wallet.id].currentTotalAssets,
+        walletsPrices[wallet.id]?.data,
+        walletsPrices[wallet.id]?.currentTotalAssets,
         currency,
       );
     }

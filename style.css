@@ -79,4 +79,8 @@
       transform: rotate(1turn);
     }
   }
+
+  .optionbtn {
+    @apply p-4 flex items-center hover:bg-gray-100 cursor-pointer rounded focus:outline-none;
+  }
 }
