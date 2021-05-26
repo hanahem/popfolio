@@ -2,9 +2,9 @@ import { ChartData } from "chart.js";
 import React, { FC, useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { useDispatch, useSelector } from "react-redux";
-import { Currencies, CustomState, getPrices } from "../../store/store";
+import { Currencies, CustomState, getPrices, getWalletPrices } from "../../store/store";
 import { formatCurrency, FRAMES } from "../../utils";
-import { Asset, TimeFrame } from "../../utils/types";
+import { Asset, GroupedWallet, TimeFrame } from "../../utils/types";
 
 type TimeFrameProps = {
   selectedTimeFrame: string;
@@ -37,7 +37,8 @@ const ChartContainer: FC<{
   ids: string[];
   assets: Asset[];
   isWallet?: boolean;
-}> = ({ ids, assets, isWallet }) => {
+  wallets: GroupedWallet[] | undefined;
+}> = ({ ids, assets, isWallet, wallets }) => {
   const dispatch = useDispatch();
 
   //Store data
@@ -76,14 +77,16 @@ const ChartContainer: FC<{
 
   //Effects
   useEffect(() => {
-    (async function () {
-      try {
-        await dispatch(getPrices(timeFrame, ids, assets));
-      } catch (e) {
-        console.error("getPrices error: ", e);
-      }
-    })();
-  }, [timeFrame]);
+    if (wallets) {
+      (async function () {
+        try {
+          dispatch(getWalletPrices(wallets, timeFrame));
+        } catch (e) {
+          console.error("getPrices error: ", e);
+        }
+      })();
+    }
+  }, [timeFrame, wallets]);
 
   useEffect(() => {
     if (prices.data && prices.data.length && currency) {
@@ -165,8 +168,9 @@ const OverviewChart: FC<{
   ids: string[];
   assets: Asset[];
   isWallet?: boolean;
-}> = ({ ids, assets, isWallet }) => {
-  return <ChartContainer ids={ids} assets={assets} isWallet={isWallet} />;
+  wallets: GroupedWallet[] | undefined;
+}> = ({ ids, assets, isWallet, wallets }) => {
+  return <ChartContainer ids={ids} assets={assets} isWallet={isWallet} wallets={wallets} />;
 };
 
 export default OverviewChart;

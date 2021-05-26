@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { createStore, applyMiddleware, Store, AnyAction } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
 import { PortfolioDataBase } from "../utils/dbInit";
-import { Asset, Wallet } from "../utils/types";
+import { Asset, GroupedWallet, Wallet } from "../utils/types";
 
 export enum Currencies {
   USD = "usd",
@@ -11,10 +11,16 @@ export enum Currencies {
 }
 
 export enum ActionTypes {
+  //Fetch prices
   FETCH_PRICES_REQUEST = "FETCH_PRICES_REQUEST",
   FETCH_PRICES_FAILURE = "FETCH_PRICES_FAILURE",
   FETCH_PRICES_SUCCESS = "FETCH_PRICES_SUCCESS",
+  //Db Status
   LOAD_DB_SUCCESS = "LOAD_DB_SUCCESS",
+  //Fetch wallets prices
+  FETCH_WALLETS_REQUEST = "FETCH_WALLETS_REQUEST",
+  FETCH_WALLETS_FAILURE = "FETCH_WALLETS_FAILURE",
+  FETCH_WALLETS_SUCCESS = "FETCH_WALLETS_SUCCESS",
 }
 
 let store: Store | undefined;
@@ -39,6 +45,11 @@ export type CustomState = {
         wallets: Wallet[];
         assets: Asset[];
         plainAssets: string[];
+      }
+    | undefined;
+  walletPrices:
+    | {
+        [id: number]: number[];
       }
     | undefined;
 };
@@ -95,6 +106,49 @@ const reducer = (state = initialState, action: AnyAction) => {
         prices: {
           data: action.payload.prices,
           currentTotalAssets: action.payload.currentTotalAssets,
+          status: {
+            success: true,
+            loading: false,
+            error: false,
+            errorMessage: "",
+          },
+        },
+      };
+    case ActionTypes.FETCH_WALLETS_REQUEST:
+      return {
+        ...state,
+        walletPrices: {
+          ...state.walletPrices,
+          status: {
+            success: false,
+            loading: true,
+            error: false,
+            errorMessage: "",
+          },
+        },
+      };
+    case ActionTypes.FETCH_WALLETS_FAILURE:
+      return {
+        ...state,
+        walletPrices: {
+          ...state.walletPrices,
+          status: {
+            success: false,
+            loading: false,
+            error: true,
+            errorMessage: action.payload.errorMessage,
+          },
+        },
+      };
+    case ActionTypes.FETCH_WALLETS_SUCCESS:
+      return {
+        ...state,
+        walletPrices: {
+          ...state.walletPrices,
+          [action.payload.walletId]: {
+            data: action.payload.prices,
+            currentTotalAssets: action.payload.currentTotalAssets,
+          },
           status: {
             success: true,
             loading: false,
@@ -160,14 +214,25 @@ export const getSimplePriceURI = (ids: string[]): string =>
  ** Price Actions
  */
 
+type GetPricesType = {
+  prices: number[][];
+  currentTotalAssets: {
+    [currency: string]: number;
+  };
+};
+
 export async function getPrices(
   timeFrame: string,
   ids: string[],
   assets: Asset[],
-): Promise<AnyAction | void> {
+): Promise<GetPricesType | undefined> {
   store?.dispatch({
     type: ActionTypes.FETCH_PRICES_REQUEST,
   });
+
+  // store?.dispatch({
+  //   type: ActionTypes.FETCH_PRICES_REQUEST,
+  // });
 
   if (ids && assets && assets.length) {
     await Promise.all(ids.map((id) => axios.get(getMarketChartURI(id, timeFrame))))
@@ -223,25 +288,68 @@ export async function getPrices(
           )[idx],
         ]);
 
-        return store?.dispatch({
+        store?.dispatch({
           type: ActionTypes.FETCH_PRICES_SUCCESS,
-          payload: {
-            prices: compPrices,
-            currentTotalAssets: currentTotalAssets,
-          },
+          // payload: {
+          //   prices: compPrices,
+          //   currentTotalAssets: currentTotalAssets,
+          // },
         });
+
+        return { prices: compPrices, currentTotalAssets };
       })
       // FAILURE
       .catch((err) => {
         console.error(err);
-        return store?.dispatch({
-          type: ActionTypes.FETCH_PRICES_FAILURE,
-          payload: { errorMessage: "Failed to load prices data" },
-        });
+        // store?.dispatch({
+        //   type: ActionTypes.FETCH_PRICES_FAILURE,
+        //   payload: { errorMessage: "Failed to load prices data" },
+        // });
+        return undefined;
       });
   } else {
-    return store?.dispatch({
-      type: ActionTypes.FETCH_PRICES_FAILURE,
+    // store?.dispatch({
+    //   type: ActionTypes.FETCH_PRICES_FAILURE,
+    //   payload: {
+    //     errorMessage: "You don't have assets in your portfolio. Add some from your profile board.",
+    //   },
+    // });
+    return undefined;
+  }
+}
+
+export async function getWalletPrices(wallets: GroupedWallet[], timeFrame: string) {
+  store?.dispatch({
+    type: ActionTypes.FETCH_WALLETS_REQUEST,
+  });
+  if (wallets) {
+    await Promise.all(
+      wallets.map(async (wallet: GroupedWallet) => {
+        const ids = wallet.assets.map((asset: Asset) => asset.cgId) as string[];
+        const walletData = await getPrices(timeFrame, ids, wallet.assets);
+        if (walletData) {
+          store?.dispatch({
+            type: ActionTypes.FETCH_WALLETS_SUCCESS,
+            payload: {
+              walletId: wallet.id,
+              prices: walletData.prices,
+              currentTotalAssets: walletData.currentTotalAssets,
+            },
+          });
+        } else {
+          store?.dispatch({
+            type: ActionTypes.FETCH_WALLETS_FAILURE,
+            payload: {
+              errorMessage: "Fetch all wallets data error",
+            },
+          });
+        }
+      }),
+    );
+    // return Promise.all(promises);
+  } else {
+    store?.dispatch({
+      type: ActionTypes.FETCH_WALLETS_FAILURE,
       payload: {
         errorMessage: "You don't have assets in your portfolio. Add some from your profile board.",
       },
