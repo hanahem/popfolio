@@ -5,6 +5,7 @@ import { CustomState, loadDb } from "../../store/store";
 import { lottieAnimation } from "../../utils/animation";
 import { db } from "../../utils/dbInit";
 import { Asset, GroupedWallet, Wallet } from "../../utils/types";
+import AssetsTable from "../AssetsOverview/AssetsTable";
 import OverviewChart from "../Charts/OverviewChart";
 import Title from "../Generics/Title";
 import WalletsGrid from "../WalletsOverview.tsx/WalletsGrid";
@@ -52,11 +53,14 @@ const DashboardScreen: FC = () => {
           <div className="h-44 animate-pulse" />
         )}
       </div>
-      <Title title="Wallets" />
-      <div className="mt-4">
-        {storeDb && groupedAssets?.length ? (
+
+      {storeDb && groupedAssets?.length && storeDb.assets ? (
+        <>
           <WalletsGrid wallets={groupedAssets} />
-        ) : (
+          <AssetsTable assets={storeDb.assets} />
+        </>
+      ) : (
+        <div className="mt-4">
           <div className="h-20 flex-col flex justify-center items-center">
             <lottie-player
               ref={lottieRef}
@@ -68,8 +72,8 @@ const DashboardScreen: FC = () => {
             />
             <p className="text-sm mt-2">{"You don't have any wallets or assets yet"}</p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
