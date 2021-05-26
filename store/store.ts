@@ -5,6 +5,36 @@ import { composeWithDevTools } from "redux-devtools-extension";
 import { PortfolioDataBase } from "../utils/dbInit";
 import { Asset, Wallet } from "../utils/types";
 
+export type PricesType = {
+  /*eslint-disable @typescript-eslint/no-explicit-any*/
+  data: any;
+  currentTotalAssets: {
+    [currencyName: string]: number;
+  };
+  status: {
+    success: boolean;
+    loading: boolean;
+    error: boolean;
+    errorMessage: string;
+  };
+};
+
+export type WalletsPricesType = {
+  [id: number]: {
+    /*eslint-disable @typescript-eslint/no-explicit-any*/
+    data: any;
+    currentTotalAssets: {
+      [currecyName: string]: number;
+    };
+  };
+};
+
+export type DbType = {
+  wallets: Wallet[];
+  assets: Asset[];
+  plainAssets: string[];
+};
+
 export enum Currencies {
   USD = "usd",
   EUR = "eur",
@@ -14,6 +44,7 @@ export enum ActionTypes {
   FETCH_PRICES_REQUEST = "FETCH_PRICES_REQUEST",
   FETCH_PRICES_FAILURE = "FETCH_PRICES_FAILURE",
   FETCH_PRICES_SUCCESS = "FETCH_PRICES_SUCCESS",
+  FETCH_WALLET_PRICES_SUCCESS = "FETCH_WALLET_PRICES_SUCCESS",
   LOAD_DB_SUCCESS = "LOAD_DB_SUCCESS",
 }
 
@@ -21,26 +52,9 @@ let store: Store | undefined;
 
 export type CustomState = {
   currency: Currencies;
-  prices: {
-    /* eslint-disable  @typescript-eslint/no-explicit-any */
-    data: any;
-    currentTotalAssets: {
-      [currecyName: string]: number;
-    };
-    status: {
-      success: boolean;
-      loading: boolean;
-      error: boolean;
-      errorMessage: string;
-    };
-  };
-  db:
-    | {
-        wallets: Wallet[];
-        assets: Asset[];
-        plainAssets: string[];
-      }
-    | undefined;
+  prices: PricesType;
+  walletsPrices?: WalletsPricesType;
+  db?: DbType;
 };
 
 const initialState: CustomState = {
@@ -58,6 +72,7 @@ const initialState: CustomState = {
       errorMessage: "",
     },
   },
+  walletsPrices: undefined,
   db: undefined,
 };
 
@@ -95,6 +110,25 @@ const reducer = (state = initialState, action: AnyAction) => {
         prices: {
           data: action.payload.prices,
           currentTotalAssets: action.payload.currentTotalAssets,
+          status: {
+            success: true,
+            loading: false,
+            error: false,
+            errorMessage: "",
+          },
+        },
+      };
+    case ActionTypes.FETCH_WALLET_PRICES_SUCCESS:
+      return {
+        ...state,
+        walletsPrices: {
+          ...state.walletsPrices,
+          [action.payload.walletId]: {
+            data: action.payload.prices,
+            currentTotalAssets: action.payload.currentTotalAssets,
+          },
+        },
+        prices: {
           status: {
             success: true,
             loading: false,
@@ -164,6 +198,7 @@ export async function getPrices(
   timeFrame: string,
   ids: string[],
   assets: Asset[],
+  walletId?: number,
 ): Promise<AnyAction | void> {
   store?.dispatch({
     type: ActionTypes.FETCH_PRICES_REQUEST,
@@ -223,13 +258,24 @@ export async function getPrices(
           )[idx],
         ]);
 
-        return store?.dispatch({
-          type: ActionTypes.FETCH_PRICES_SUCCESS,
-          payload: {
-            prices: compPrices,
-            currentTotalAssets: currentTotalAssets,
-          },
-        });
+        if (walletId) {
+          return store?.dispatch({
+            type: ActionTypes.FETCH_WALLET_PRICES_SUCCESS,
+            payload: {
+              prices: compPrices,
+              currentTotalAssets: currentTotalAssets,
+              walletId,
+            },
+          });
+        } else {
+          return store?.dispatch({
+            type: ActionTypes.FETCH_PRICES_SUCCESS,
+            payload: {
+              prices: compPrices,
+              currentTotalAssets: currentTotalAssets,
+            },
+          });
+        }
       })
       // FAILURE
       .catch((err) => {

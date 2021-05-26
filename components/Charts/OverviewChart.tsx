@@ -4,7 +4,7 @@ import { Line } from "react-chartjs-2";
 import { useDispatch, useSelector } from "react-redux";
 import { Currencies, CustomState, getPrices } from "../../store/store";
 import { formatCurrency, FRAMES } from "../../utils";
-import { Asset, TimeFrame } from "../../utils/types";
+import { Asset, GroupedWallet, TimeFrame } from "../../utils/types";
 
 type TimeFrameProps = {
   selectedTimeFrame: string;
@@ -37,11 +37,13 @@ const ChartContainer: FC<{
   ids: string[];
   assets: Asset[];
   isWallet?: boolean;
-}> = ({ ids, assets, isWallet }) => {
+  wallet?: GroupedWallet;
+}> = ({ ids, assets, isWallet, wallet }) => {
   const dispatch = useDispatch();
 
   //Store data
   const prices = useSelector((state: CustomState) => state.prices);
+  const walletsPrices = useSelector((state: CustomState) => state.walletsPrices);
   const currency = useSelector((state: CustomState) => state.currency);
 
   //Local state
@@ -60,7 +62,6 @@ const ChartContainer: FC<{
       labels: prices?.map((p: number[]) => p[0]),
       datasets: [
         {
-          label: "# of Votes",
           data: prices?.map((p: number[]) => p[1]),
           fill: "start",
           backgroundColor: "#ffd0ea",
@@ -78,18 +79,30 @@ const ChartContainer: FC<{
   useEffect(() => {
     (async function () {
       try {
-        await dispatch(getPrices(timeFrame, ids, assets));
+        if (isWallet && wallet) {
+          const ids = wallet.assets.map((asset: Asset) => asset.cgId) as string[];
+          await dispatch(getPrices(timeFrame, ids, wallet?.assets, wallet?.id));
+        } else {
+          await dispatch(getPrices(timeFrame, ids, assets));
+        }
       } catch (e) {
         console.error("getPrices error: ", e);
       }
     })();
-  }, [timeFrame]);
+  }, [timeFrame, wallet]);
 
   useEffect(() => {
     if (prices.data && prices.data.length && currency) {
       updateData(prices.data, prices.currentTotalAssets, currency);
     }
-  }, [prices, currency]);
+    if (walletsPrices && wallet && wallet.id) {
+      updateData(
+        walletsPrices[wallet.id].data,
+        walletsPrices[wallet.id].currentTotalAssets,
+        currency,
+      );
+    }
+  }, [prices, walletsPrices, currency, wallet]);
 
   const options = {
     maintainAspectRatio: false,
@@ -118,7 +131,7 @@ const ChartContainer: FC<{
     interaction: { intersect: false },
   };
 
-  if (isWallet) {
+  if (isWallet && wallet) {
     return (
       <div className={"absolute bottom-0 left-0 w-full h-1/2 z-0 opacity-25"}>
         {!prices?.status?.loading && data ? (
@@ -165,8 +178,9 @@ const OverviewChart: FC<{
   ids: string[];
   assets: Asset[];
   isWallet?: boolean;
-}> = ({ ids, assets, isWallet }) => {
-  return <ChartContainer ids={ids} assets={assets} isWallet={isWallet} />;
+  wallet?: GroupedWallet;
+}> = ({ ids, assets, isWallet, wallet }) => {
+  return <ChartContainer ids={ids} assets={assets} isWallet={isWallet} wallet={wallet} />;
 };
 
 export default OverviewChart;
