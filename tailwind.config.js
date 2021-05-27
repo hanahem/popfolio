@@ -28,8 +28,8 @@ module.exports = {
         disabled: "#E6E6E6",
         background: "#fff",
         //darkmode colors
-        darkbg: "#171531",
-        darkfg: "#211d45",
+        darkbg: "#211d45",
+        darkfg: "#171531",
         darkgray: "#4b4779"
       },
       borderRadius: {

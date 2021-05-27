@@ -161,7 +161,7 @@ const ChartContainer: FC<{
                 <TimeFrameControls selectedTimeFrame={timeFrame} setTimeFrame={setTimeFrame} />
                 <div className={prices?.status?.loading ? "animate-pulse" : "animate-none"}>
                   <h4 className="text-sm uppercase text-gray-500 dark:text-gray-300 leading-tight">Total assets</h4>
-                  <h3 className="text-3xl text-gray-700 dark:text-gray-200 font-semibold leading-tight my-3">
+                  <h3 className="text-3xl text-gray-700 dark:text-white font-semibold leading-tight my-3">
                     {finalPrice?.toFixed(2) + " " + formatCurrency(currency)}
                   </h3>
                   <p
