@@ -1,7 +1,7 @@
 import React, { FC, useEffect } from "react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { CustomState, WalletsPricesType } from "../../store/store";
+import { CustomState } from "../../store/store";
 import { formatCurrency } from "../../utils";
 import { Asset, GroupedWallet } from "../../utils/types";
 import OverviewChart from "../Charts/OverviewChart";
@@ -18,16 +18,16 @@ const WalletItem: FC<{ wallet: GroupedWallet }> = ({ wallet }) => {
   const walletsData = walletsPrices?.[id as number];
 
   useEffect(() => {
-    if (walletsData) {
+    if (walletsData && currency) {
       const firstPrice = walletsData.data[0][1];
       setPriceChange(((walletsData.currentTotalAssets[currency] - firstPrice) / firstPrice) * 100);
     }
   }, [walletsData, currency]);
 
   return (
-    <div className="board flex items-start justify-between relative h-28">
+    <div className="board flex items-start justify-between relative h-28 overflow-hidden">
       <div className="flex items-start z-10">
-        <div className="flex relative bg-orange-500 justify-center items-center w-12 h-12">
+        <div className="flex relative justify-center items-center w-12 h-12">
           <img className="rounded-full w-12 h-12" alt={name} src={icon} />
         </div>
         <div className="flex flex-col items-start ml-6">

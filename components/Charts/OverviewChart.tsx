@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Currencies, CustomState, getPrices } from "../../store/store";
 import { formatCurrency, FRAMES } from "../../utils";
 import { Asset, GroupedWallet, TimeFrame } from "../../utils/types";
+import { useTheme } from "next-themes";
 
 type TimeFrameProps = {
   selectedTimeFrame: string;
@@ -12,6 +13,17 @@ type TimeFrameProps = {
 };
 
 const TimeFrameControls: FC<TimeFrameProps> = ({ selectedTimeFrame, setTimeFrame }) => {
+  const { setTheme } = useTheme();
+
+  const darkMode = useSelector((state: CustomState) => state.darkMode);
+
+  useEffect(() => {
+    if (darkMode) {
+      setTheme("dark");
+    } else {
+      setTheme("light");
+    }
+  }, [darkMode]);
   return (
     <div className="absolute top-2 left-2">
       <div className="grid grid-cols-4 grid-rows-1 gap-1">
@@ -19,12 +31,12 @@ const TimeFrameControls: FC<TimeFrameProps> = ({ selectedTimeFrame, setTimeFrame
           return (
             <div
               key={idx}
-              className={`bg-white bg-opacity-75 rounded-sm hover:bg-brand-100 p-1 flex justify-center items-center cursor-pointer ${
+              className={`bg-white dark:bg-darkfg bg-opacity-75 rounded-sm hover:bg-brand-100 dark:hover:bg-brand-600 p-1 flex justify-center items-center cursor-pointer ${
                 selectedTimeFrame === frame.value ? "bg-brand-100 border" : ""
               }`}
               onClick={() => setTimeFrame(frame.value)}
             >
-              <p className="text-gray-600 text-xs">{frame.label}</p>
+              <p className="text-gray-600 dark:text-gray-300 text-xs">{frame.label}</p>
             </div>
           );
         })}
@@ -69,8 +81,8 @@ const ChartContainer: FC<{
         },
       ],
     });
-    const firstPrice = prices[0][1];
-    const lastPrice = currentPrice[currency];
+    const firstPrice = prices?.[0][1];
+    const lastPrice = currentPrice?.[currency];
     setFinalPrice(lastPrice);
     setPriceChange(((lastPrice - firstPrice) / firstPrice) * 100);
   }
@@ -97,8 +109,8 @@ const ChartContainer: FC<{
     }
     if (walletsPrices && wallet && wallet.id) {
       updateData(
-        walletsPrices[wallet.id].data,
-        walletsPrices[wallet.id].currentTotalAssets,
+        walletsPrices[wallet.id]?.data,
+        walletsPrices[wallet.id]?.currentTotalAssets,
         currency,
       );
     }
@@ -144,12 +156,12 @@ const ChartContainer: FC<{
       <div className={"h-44"}>
         <div className="w-full">
           <div className="rounded-lg shadow mb-4">
-            <div className="rounded-lg bg-white relative overflow-hidden">
+            <div className="rounded-lg bg-white dark:bg-darkbg relative overflow-hidden">
               <div className="px-3 pt-8 pb-10 text-center relative z-10">
                 <TimeFrameControls selectedTimeFrame={timeFrame} setTimeFrame={setTimeFrame} />
                 <div className={prices?.status?.loading ? "animate-pulse" : "animate-none"}>
-                  <h4 className="text-sm uppercase text-gray-500 leading-tight">Total assets</h4>
-                  <h3 className="text-3xl text-gray-700 font-semibold leading-tight my-3">
+                  <h4 className="text-sm uppercase text-gray-500 dark:text-gray-300 leading-tight">Total assets</h4>
+                  <h3 className="text-3xl text-gray-700 dark:text-white font-semibold leading-tight my-3">
                     {finalPrice?.toFixed(2) + " " + formatCurrency(currency)}
                   </h3>
                   <p

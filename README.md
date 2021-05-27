@@ -1,154 +1,102 @@
-<!-- ![Kiwi](./public/images/logo_small.png)
+<p align="center">
+  <a href="" rel="noopener">
+ <img width=200px height=200px src="./public/images/lollipop.png" alt="Project logo"></a>
+</p>
 
-# Kiwi dApp
+<h1 align="center" style="margin-bottom: 30px;">Popfolio.</h3>    
 
-A training frontend project for `Tailwindcss`, `Web3` and `Metamask` integrations.
+<div align="center">
 
-[![forthebadge](https://forthebadge.com/images/badges/made-with-typescript.svg)](https://forthebadge.com)
+[![Status](https://img.shields.io/badge/status-active-success.svg)]()
+[![GitHub Issues](https://img.shields.io/github/issues/kylelobo/The-Documentation-Compendium.svg)](https://github.com/hanahem/popfolio/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/kylelobo/The-Documentation-Compendium.svg)](https://github.com/hanahem/popfolio/pulls)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
-## Deploy your own
+</div>
 
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example)
+---
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https%3A%2F%2Fgithub.com%2FBlockchainpartner%2Ftailwind-web3)
-## Demo
+<p align="center"> A light off-chain crypto portfolio tracker
+    <br> 
+</p>
 
-Click on the logo to test the demo deployed with 
-[Vercel](https://vercel.com)
+## 📝 Table of Contents
 
+- [About](#about)
+- [Getting Started](#getting_started)
+- [Deployment](#deployment)
+- [Usage](#usage)
+- [Built Using](#built_using)
+- [TODO](./TODO.md)
+- [Contributing](./CONTRIBUTING.md)
+- [Authors](#authors)
+- [Acknowledgments](#acknowledgement)
 
-[<img src="https://assets.vercel.com/image/upload/q_auto/front/favicon/vercel/180x180.png" width="40px"/>](https://test-mew.vercel.app/)
+## 🧐 About <a name = "about"></a>
 
-## Code Notes
+Popfolio is for hodlers who don't make too many trades and want to keep track of all their assets in the same browser.
+It's a convenient way of tracking your assets right between swiss-knife dashboards and spreadsheets.
 
-#### Web3 usage
+## 🏁 Getting Started <a name = "getting_started"></a>
 
-This is the way web3 is instantiated.  
-Replace `givenProvider` by a custom RCP URI if needed.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
 
-```typescript
-import Web3 from "web3";
+### Prerequisites
 
-const web3 = new Web3(Web3.givenProvider);
+What things you need to install the software and how to install them.
+
+```
+node
+yarn
+next
+vercel
 ```
 
-#### Web3 Metamask setup
+### Installing
 
-There are the main functions to setup for a minimal Metamask Onboarding.  
-- Checking if the extension is installed
-- Connect the user
-- And get the accounts: address and balance
+The development env doesn't require a lot, there are no ENVs, APIs or other dependencies.
 
-More documentation about Metamask Onboarding [here](https://docs.metamask.io/guide/create-dapp.html#basic-action-part-1).
+After cloning the repo, you can install the deps
 
-```typescript
-const checkAccounts = async () => {
-    //we use eth_accounts because it returns a list of addresses owned by us.
-    if (typeof window !== undefined) {
-      const mmAccounts = await window.ethereum.request({method: 'eth_accounts'});
-      setAccounts(mmAccounts);
-      dispatch({
-        type: 'SET_ACCOUNTS',
-        payload: {
-          accounts: mmAccounts,
-        },
-      });
-      await getBalance();
-    } else {
-      setAccounts(await []);
-    }
-};
-
-//This will start the onboarding proccess
-const onClickInstall = () => {
-    //On this object we have startOnboarding which will start the onboarding process for our end user
-    onboarding.startOnboarding();
-};
-
-//This will request a connection to Metamask and launch checkAccounts()
-const onClickConnect = async () => {
-    try {
-      // Will open the MetaMask UI
-      if (typeof window !== undefined) await window.ethereum.request({method: 'eth_requestAccounts'});
-      await checkAccounts();
-    } catch (error) {
-      console.error(error);
-    }
-};
-
-//This will provide the balances on accounts' update (via useEffect)
-const getBalance = async () => {
-    let address: any, wei, mmBalance;
-    address = accounts[0];
-    wei = promisify((cb: any) => web3.eth.getBalance(address, cb));
-    try {
-      mmBalance = web3.utils.fromWei(await wei as string, 'ether');
-      setBalance(mmBalance);
-    } catch (error) {
-      console.log(error);
-    }
-};
-
-useEffect(() => {
-    if(accounts.length > 0 && typeof window !== undefined){
-      (async function() {
-        try {
-          await getBalance();
-        } catch (e) {
-          console.error(e);
-        }
-      })();
-    }
-}, [accounts]);
+```
+yarn
 ```
 
-#### promisify
+And start your dev server
 
-Util function used to resolve and manage web3 Promises.
-
-```typescript
-const promisify = (inner: any) =>
-  new Promise((resolve, reject) =>
-    inner((err: any, res: any) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(res);
-      }
-    })
-  );
+```
+yarn run dev
+OR
+next
 ```
 
-#### window + nextJs turnaround
+End with an example of getting some data out of the system or using it for a little demo.
 
-NextJs uses SSR and SSG. While serving the frontend, on the SSR phase, there is no `window` element, like on a client's browser.  
-Hence the turnaround.
+## 🎈 Usage <a name="usage"></a>
 
-```typescript
-if (typeof window !== undefined)
-```
+The app uses Redux for app state management, and Dexie.js to manage an IndexedDb instance.  
+IndexedDb uses your browser storage to save your assets and wallets. If you encounter problems or want to wipe your data, just clean your app's memory through the inspector.  
+Otherwise you can add wallets and assets to your profile and monitor them.
 
-#### ERC20 token balances
+## 🚀 Deployment <a name = "deployment"></a>
 
-Function to use o get balances for other ERC20 tokens on the connected wallet (where `ERC20_JSON` is the JSON interface).
+You can deploy the app using [Vercel](https://www.vercel.com/).
 
-```typescript
-async function checkERC20Amount(web3: any, userAddress: string, erc20Address: string) {
-  const	erc20Json = new web3.eth.Contract(ERC20_JSON, erc20Address);
-  const	balanceRightNow = await erc20Json.methods.balanceOf(userAddress).call().then((e: any) => e);
-  return web3.utils.fromWei(balanceRightNow);
-}
-```
+## ⛏️ Built Using <a name = "built_using"></a>
 
-## Dependencies
+- [Next with Typescript](https://www.nextjs.org/) - React Framework
+- [TailwindCSS](https://tailwindcss.com/) - CSS Framework
+- [Dexie](https://dexie.org/) - IndexedDb Wrapper
+- [Redux](https://redux.js.org/) - React State Container
 
-<p float="left">
-    <img src="https://cdn.worldvectorlogo.com/logos/next-js.svg" alt="Next" width="30px"/>
-    <img src="https://miro.medium.com/max/816/1*mn6bOs7s6Qbao15PMNRyOA.png" alt="TypeScript" width="30px"/>
-    <img src="https://lh3.googleusercontent.com/proxy/iMnwmr24qPpT9gjnR_4xNv97ykdyRKvScr4GGRQ14CJlKy8xwZ0Ev-Aiw4qtQEIu111WmlC0TH4hbsOv0Lp2q7MMX4ZGaqCP" alt="Redux" width="30px"/>
-    <img src="https://cdn.worldvectorlogo.com/logos/tailwindcss.svg" alt="TailwindCSS" width="30px"/>
-    <img src="https://miro.medium.com/max/1400/1*2GHi9FwnyA5UTJpcxPSG7A.jpeg" alt="web3" width="30px"/>
-    <img src="https://platform.eductx.org/static/media/metamask.5e06983f.png" alt="Metamask" width="30px"/>
-</p> -->
+## ✍️ Authors <a name = "authors"></a>
 
-<p>Work in progress</p>
+- [@hanahem](https://github.com/hanahem) - Idea & Initial work
+
+See also the list of [contributors](https://github.com/hanahem/popfolio/graphs/contributors) who participated in this project.
+
+## 🎉 Acknowledgements <a name = "acknowledgement"></a>
+
+- [@TBouder](https://github.com/TBouder) for some ideas and inspiration
+- Inspiration: Uniswap, Zapper.fi, Zerion
+- References: [This Dribble Design](https://cdn.dribbble.com/users/2716253/screenshots/15516075/media/611362828179bf2bfffe5ab7485c54c4.png?compress=1&resize=1600x1200) and [this one](https://cdn.dribbble.com/users/2716253/screenshots/15516075/media/611362828179bf2bfffe5ab7485c54c4.png?compress=1&resize=1600x1200)

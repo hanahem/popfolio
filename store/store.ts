@@ -45,12 +45,17 @@ export enum ActionTypes {
   FETCH_PRICES_FAILURE = "FETCH_PRICES_FAILURE",
   FETCH_PRICES_SUCCESS = "FETCH_PRICES_SUCCESS",
   FETCH_WALLET_PRICES_SUCCESS = "FETCH_WALLET_PRICES_SUCCESS",
+
   LOAD_DB_SUCCESS = "LOAD_DB_SUCCESS",
+
+  UPDATE_CURRENCY = "UPDATE_CURRENCY",
+  UPDATE_DARKMODE = "UPDATE_DARKMODE",
 }
 
 let store: Store | undefined;
 
 export type CustomState = {
+  darkMode: boolean;
   currency: Currencies;
   prices: PricesType;
   walletsPrices?: WalletsPricesType;
@@ -58,6 +63,7 @@ export type CustomState = {
 };
 
 const initialState: CustomState = {
+  darkMode: false,
   currency: Currencies.USD,
   prices: {
     data: {},
@@ -141,6 +147,16 @@ const reducer = (state = initialState, action: AnyAction) => {
       return {
         ...state,
         db: action.payload,
+      };
+    case ActionTypes.UPDATE_CURRENCY:
+      return {
+        ...state,
+        currency: action.payload,
+      };
+      case ActionTypes.UPDATE_DARKMODE:
+      return {
+        ...state,
+        darkMode: action.payload,
       };
     default:
       return state;
@@ -308,4 +324,22 @@ export async function loadDb(db: PortfolioDataBase): Promise<void> {
       },
     });
   }
+}
+
+export function updateCurrency(): void {
+  const currency = store?.getState().currency;
+  const nextCurrency = currency === Currencies.EUR ? Currencies.USD : Currencies.EUR;
+  store?.dispatch({
+    type: ActionTypes.UPDATE_CURRENCY,
+    payload: nextCurrency,
+  });
+}
+
+
+export function updateDarkMode(): void {
+  const darkMode = store?.getState().darkMode;
+  store?.dispatch({
+    type: ActionTypes.UPDATE_DARKMODE,
+    payload: !darkMode,
+  });
 }
