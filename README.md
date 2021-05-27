@@ -99,4 +99,4 @@ See also the list of [contributors](https://github.com/hanahem/popfolio/graphs/c
 
 - [@TBouder](https://github.com/TBouder) for some ideas and inspiration
 - Inspiration: Uniswap, Zapper.fi, Zerion
-- References: [This Dribble Design](https://cdn.dribbble.com/users/2716253/screenshots/15516075/media/611362828179bf2bfffe5ab7485c54c4.png?compress=1&resize=1600x1200) and [this one][https://cdn.dribbble.com/users/2716253/screenshots/15516075/media/611362828179bf2bfffe5ab7485c54c4.png?compress=1&resize=1600x1200]
+- References: [This Dribble Design](https://cdn.dribbble.com/users/2716253/screenshots/15516075/media/611362828179bf2bfffe5ab7485c54c4.png?compress=1&resize=1600x1200) and [this one](https://cdn.dribbble.com/users/2716253/screenshots/15516075/media/611362828179bf2bfffe5ab7485c54c4.png?compress=1&resize=1600x1200)
