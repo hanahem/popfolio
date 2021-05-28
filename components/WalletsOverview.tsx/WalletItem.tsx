@@ -1,3 +1,4 @@
+import { useRouter } from "next/dist/client/router";
 import React, { FC, useEffect } from "react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
@@ -7,14 +8,14 @@ import { Asset, GroupedWallet } from "../../utils/types";
 import OverviewChart from "../Charts/OverviewChart";
 
 const WalletItem: FC<{ wallet: GroupedWallet }> = ({ wallet }) => {
-  const storeDb = useSelector((state: CustomState) => state.db);
-  const walletsPrices = useSelector((state: CustomState) => state.walletsPrices);
-  const currency = useSelector((state: CustomState) => state.currency);
+  const router = useRouter();
+  const { icon, name, assets, id } = wallet;
 
   const [priceChange, setPriceChange] = useState(0);
 
-  const { icon, name, assets, id } = wallet;
-
+  const storeDb = useSelector((state: CustomState) => state.db);
+  const walletsPrices = useSelector((state: CustomState) => state.walletsPrices);
+  const currency = useSelector((state: CustomState) => state.currency);
   const walletsData = walletsPrices?.[id as number];
 
   useEffect(() => {
@@ -25,7 +26,10 @@ const WalletItem: FC<{ wallet: GroupedWallet }> = ({ wallet }) => {
   }, [walletsData, currency]);
 
   return (
-    <div className="board flex items-start justify-between relative h-28 overflow-hidden hover:shadow-md cursor-pointer">
+    <div
+      className="board flex items-start justify-between relative h-28 overflow-hidden hover:shadow-md cursor-pointer"
+      onClick={() => router.push(`/wallets/${id}`)}
+    >
       <div className="flex items-start z-10">
         <div className="flex relative justify-center items-center w-12 h-12">
           <img className="rounded-full w-12 h-12" alt={name} src={icon} />
