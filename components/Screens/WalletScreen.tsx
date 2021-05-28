@@ -3,6 +3,7 @@ import React, { FC, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { CustomState } from "../../store/store";
 import { Asset, Wallet, WalletPriceData } from "../../utils/types";
+import WalletChart from "../Charts/WalletChart";
 import BackButton from "../Generics/BackButton";
 import WalletAssets from "../Wallet/WalletAssets";
 import WalletHeader from "../Wallet/WalletHeader";
@@ -41,6 +42,9 @@ const WalletScreen: FC = () => {
       ) : (
         <div className="animate-pulse bg-gray-200 w-72 h-28 rounded" />
       )}
+      <div className="my-8 h-64 w-1/2">
+        <WalletChart data={wallet?.walletPriceData.data} />
+      </div>
       {assets ? (
         <WalletAssets assets={assets} />
       ) : (

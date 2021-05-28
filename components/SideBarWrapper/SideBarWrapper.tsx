@@ -61,7 +61,7 @@ const SidebarWrapper: FC<{ children: ReactNode }> = ({ children }) => {
         </div>
       </nav>
       <div className="dark:bg-darkfg w-full ml-72">
-        <nav className="bg-white dark:bg-darkbg h-20 border-b border-gray dark:border-darkbg flex justify-between items-center py-4 px-6">
+        <nav className="bg-white dark:bg-darkbg h-20 border-b border-gray dark:border-darkbg flex justify-between items-center py-4 px-6 z-10">
           <div className="flex items-center">
             <button className="btn-primary flex items-center" onClick={() => goTo("/profile")}>
               <PlusIcon color="white" />
