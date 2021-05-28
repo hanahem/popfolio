@@ -10,6 +10,7 @@
 ## Features
 
 - [ ] Integrate dark mode
+- [ ] Add theme provider 
 - [ ] Assets list
 - [ ] Remove/edit wallet
 - [ ] Remove/edit asset

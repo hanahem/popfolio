@@ -52,6 +52,7 @@ const ChartContainer: FC<{
   wallet?: GroupedWallet;
 }> = ({ ids, assets, isWallet, wallet }) => {
   const dispatch = useDispatch();
+  const { theme } = useTheme();
 
   //Store data
   const prices = useSelector((state: CustomState) => state.prices);
@@ -151,7 +152,7 @@ const ChartContainer: FC<{
     return (
       <div className={"h-44"}>
         <div className="w-full">
-          <div className="rounded-lg border border-gray-300 mb-4">
+          <div className="rounded-lg border border-gray-300 dark:border-black mb-4">
             <div className="rounded-lg bg-white dark:bg-darkbg relative overflow-hidden">
               <div className="px-3 pt-8 pb-10 text-center relative z-10">
                 <TimeFrameControls selectedTimeFrame={timeFrame} setTimeFrame={setTimeFrame} />

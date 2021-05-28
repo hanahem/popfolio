@@ -18,11 +18,11 @@ const WalletHeader: FC<{ wallet: Wallet; walletPriceData: WalletPriceData }> = (
   return (
     <div className="flex flex-col items-start">
       <div className="flex justify-start items-center">
-        <img className="rounded-full w-12 h-12" alt={name} src={icon} />
+        <img className="rounded-full w-12 h-12 p-1 border-2 border-brand-500" alt={name} src={icon} />
         <p className="text-3xl ml-4">{name}</p>
       </div>
       <div className="flex justify-start items-baseline mt-4">
-        <p className="text-4xl font-light">{total.toFixed(2) + formatCurrency(currency)}</p>
+        <p className="text-4xl ">{total.toFixed(2) + formatCurrency(currency)}</p>
         <p
           className={`ml-3 leading-tight ${
             priceChange >= 0 ? "text-green-500" : "text-red-500"

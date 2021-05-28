@@ -40,15 +40,19 @@ const WalletScreen: FC = () => {
       {wallet ? (
         <WalletHeader wallet={wallet?.wallet} walletPriceData={wallet?.walletPriceData} />
       ) : (
-        <div className="animate-pulse bg-gray-200 w-72 h-28 rounded" />
+        <div className="animate-pulse bg-gray-200 dark:bg-darkbg w-72 h-28 rounded" />
       )}
-      <div className="my-8 h-64 w-1/2">
-        <WalletChart data={wallet?.walletPriceData.data} />
-      </div>
+      {wallet ? (
+        <div className="my-8 h-64 w-1/2">
+          <WalletChart data={wallet?.walletPriceData.data} />
+        </div>
+      ) : (
+        <div className="animate-pulse bg-gray-200 dark:bg-darkbg my-8 h-64 w-1/2 rounded" />
+      )}
       {assets ? (
         <WalletAssets assets={assets} />
       ) : (
-        <div className="animate-pulse bg-gray-200 w-full h-96 rounded mt-12" />
+        <div className="animate-pulse bg-gray-200 dark:bg-darkbg my-8 h-64 w-full rounded" />
       )}
     </div>
   );
