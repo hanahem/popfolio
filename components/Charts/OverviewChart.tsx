@@ -69,6 +69,7 @@ const ChartContainer: FC<{
     prices: number[][],
     currentPrice: { [currency: string]: number },
     currency: Currencies,
+    totalPrice?: number,
   ) {
     set_data({
       labels: prices?.map((p: number[]) => p[0]),
@@ -82,7 +83,7 @@ const ChartContainer: FC<{
       ],
     });
     const firstPrice = prices?.[0][1];
-    const lastPrice = currentPrice?.[currency];
+    const lastPrice = totalPrice || currentPrice?.[currency];
     setFinalPrice(lastPrice);
     setPriceChange(((lastPrice - firstPrice) / firstPrice) * 100);
   }
@@ -104,8 +105,12 @@ const ChartContainer: FC<{
   }, [timeFrame, wallet]);
 
   useEffect(() => {
-    if (prices.data && prices.data.length && currency) {
-      updateData(prices.data, prices.currentTotalAssets, currency);
+    if (prices.data && prices.data.length && currency && walletsPrices) {
+      const totalPrice = Object.keys(walletsPrices)
+        .map((id: string) => walletsPrices[parseInt(id)])
+        .map((a) => a.currentTotalAssets[currency])
+        .reduce((a, b) => a + b);
+      updateData(prices.data, prices.currentTotalAssets, currency, totalPrice);
     }
     if (walletsPrices && wallet && wallet.id) {
       updateData(
@@ -160,7 +165,9 @@ const ChartContainer: FC<{
               <div className="px-3 pt-8 pb-10 text-center relative z-10">
                 <TimeFrameControls selectedTimeFrame={timeFrame} setTimeFrame={setTimeFrame} />
                 <div className={prices?.status?.loading ? "animate-pulse" : "animate-none"}>
-                  <h4 className="text-sm uppercase text-gray-500 dark:text-gray-300 leading-tight">Total assets</h4>
+                  <h4 className="text-sm uppercase text-gray-500 dark:text-gray-300 leading-tight">
+                    Total assets
+                  </h4>
                   <h3 className="text-3xl text-gray-700 dark:text-white font-semibold leading-tight my-3">
                     {finalPrice?.toFixed(2) + " " + formatCurrency(currency)}
                   </h3>
