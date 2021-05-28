@@ -38,13 +38,6 @@ const SidebarWrapper: FC<{ children: ReactNode }> = ({ children }) => {
             <p className="text-sideIcon dark:text-white ml-4">Dashboard</p>
           </div>
           <div
-            className={`sidenav ${isPath("/stats") ? "active" : ""}`}
-            onClick={() => goTo("/stats")}
-          >
-            <StatsIcon color={theme === "dark" ? "white" : "#62686e"} />
-            <p className="text-sideIcon dark:text-white ml-4">Statistics</p>
-          </div>
-          <div
             className={`sidenav ${isPath("/profile") ? "active" : ""}`}
             onClick={() => goTo("/profile")}
           >
@@ -52,11 +45,22 @@ const SidebarWrapper: FC<{ children: ReactNode }> = ({ children }) => {
             <p className="text-sideIcon dark:text-white ml-4">Profile</p>
           </div>
           <div
-            className={`sidenav ${isPath("/info") ? "active" : ""}`}
-            onClick={() => goTo("/info")}
+            className={`sidenav ${isPath("/stats") ? "active" : ""} cursor-not-allowed`}
+            // onClick={() => goTo("/stats")}
+          >
+            <StatsIcon color={theme === "dark" ? "white" : "#62686e"} />
+            <p className="text-sideIcon dark:text-white ml-4">
+              Statistics<sub className="ml-2 text-xxs text-brand-700">SOON</sub>
+            </p>
+          </div>
+          <div
+            className={`sidenav ${isPath("/info") ? "active" : ""} cursor-not-allowed`}
+            // onClick={() => goTo("/info")}
           >
             <HelpIcon color={theme === "dark" ? "white" : "#62686e"} />
-            <p className="text-sideIcon dark:text-white ml-4">Info</p>
+            <p className="text-sideIcon dark:text-white ml-4">
+              Info<sub className="ml-2 text-xxs text-brand-700">SOON</sub>
+            </p>
           </div>
         </div>
       </nav>
