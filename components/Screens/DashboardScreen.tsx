@@ -5,7 +5,6 @@ import { CustomState, loadDb } from "../../store/store";
 import { lottieAnimation } from "../../utils/animation";
 import { db } from "../../utils/dbInit";
 import { Asset, GroupedWallet, Wallet } from "../../utils/types";
-import AssetsTable from "../AssetsOverview/AssetsTable";
 import OverviewChart from "../Charts/OverviewChart";
 import Title from "../Generics/Title";
 import WalletsGrid from "../WalletsOverview.tsx/WalletsGrid";
@@ -55,10 +54,7 @@ const DashboardScreen: FC = () => {
       </div>
 
       {storeDb && groupedAssets?.length && storeDb.assets ? (
-        <>
-          <WalletsGrid wallets={groupedAssets} />
-          <AssetsTable assets={storeDb.assets} />
-        </>
+        <WalletsGrid wallets={groupedAssets} />
       ) : (
         <div className="mt-4">
           <div className="h-20 flex-col flex justify-center items-center">

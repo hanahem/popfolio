@@ -4,7 +4,7 @@ export type Asset = {
   ticker: string;
   address?: string;
   icon: string;
-  currentPrice?: number;
+  currentPrice?: { [currency: string]: number };
   amount?: number;
   cgId?: string;
 };
@@ -34,6 +34,14 @@ export interface Portfolio {
 export interface GroupedWallet extends Wallet {
   assets: Asset[];
 }
+
+export type WalletPriceData = {
+  /*eslint-disable @typescript-eslint/no-explicit-any*/
+  data: any;
+  currentTotalAssets: {
+    [currecyName: string]: number;
+  };
+};
 
 export type CryptoPrice = {
   date: string;

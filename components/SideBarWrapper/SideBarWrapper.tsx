@@ -81,7 +81,7 @@ const SidebarWrapper: FC<{ children: ReactNode }> = ({ children }) => {
             </button>
           </div>
         </nav>
-        <div className="py-12 px-20 relative">{children}</div>
+        <div className="py-12 px-20">{children}</div>
       </div>
     </div>
   );
