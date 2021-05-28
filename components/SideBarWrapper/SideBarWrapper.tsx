@@ -25,7 +25,7 @@ const SidebarWrapper: FC<{ children: ReactNode }> = ({ children }) => {
 
   return (
     <div className="bg-white dark:bg-darkbg flex min-h-screen w-full">
-      <nav className="bg-white dark:bg-darkbg w-72 h-screen fixed flex flex-col items-center justify-start border-r-2 border-gray dark:border-darkgray">
+      <nav className="bg-gray-50 dark:bg-darkbg w-72 h-screen fixed flex flex-col items-center justify-start border-r-2 border-gray dark:border-darkgray">
         <div className="h-20 w-full">
           <div className="h-20 w-20 my-3 ml-4 flex items-center" onClick={() => router.push("/")}>
             <img src="/images/lollipop.png" alt="Sidebar icon" className="p-2 h-2/3 w-2/3" />
@@ -60,8 +60,8 @@ const SidebarWrapper: FC<{ children: ReactNode }> = ({ children }) => {
           </div>
         </div>
       </nav>
-      <div className="bg-gray-50 dark:bg-darkfg w-full ml-72">
-        <nav className="bg-white dark:bg-darkbg h-20 border-b border-gray dark:border-darkbg flex justify-between items-center py-4 px-6 z-30">
+      <div className="dark:bg-darkfg w-full ml-72">
+        <nav className="bg-white dark:bg-darkbg h-20 border-b border-gray dark:border-darkbg flex justify-between items-center py-4 px-6">
           <div className="flex items-center">
             <button className="btn-primary flex items-center" onClick={() => goTo("/profile")}>
               <PlusIcon color="white" />

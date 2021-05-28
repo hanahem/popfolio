@@ -136,15 +136,6 @@ const ChartContainer: FC<{
     elements: {
       point: { radius: 0 },
     },
-    animations: {
-      tension: {
-        duration: 1000,
-        easing: "linear",
-        from: 1,
-        to: 0,
-        loop: true,
-      },
-    },
     interaction: { intersect: false },
   };
 
@@ -160,7 +151,7 @@ const ChartContainer: FC<{
     return (
       <div className={"h-44"}>
         <div className="w-full">
-          <div className="rounded-lg shadow mb-4">
+          <div className="rounded-lg border border-gray-300 mb-4">
             <div className="rounded-lg bg-white dark:bg-darkbg relative overflow-hidden">
               <div className="px-3 pt-8 pb-10 text-center relative z-10">
                 <TimeFrameControls selectedTimeFrame={timeFrame} setTimeFrame={setTimeFrame} />

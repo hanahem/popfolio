@@ -14,7 +14,7 @@ const WalletItem: FC<{ wallet: GroupedWallet }> = ({ wallet }) => {
   const [priceChange, setPriceChange] = useState(0);
 
   const { icon, name, assets, id } = wallet;
-  
+
   const walletsData = walletsPrices?.[id as number];
 
   useEffect(() => {
@@ -25,7 +25,7 @@ const WalletItem: FC<{ wallet: GroupedWallet }> = ({ wallet }) => {
   }, [walletsData, currency]);
 
   return (
-    <div className="board flex items-start justify-between relative h-28 overflow-hidden">
+    <div className="board flex items-start justify-between relative h-28 overflow-hidden hover:shadow-md cursor-pointer">
       <div className="flex items-start z-10">
         <div className="flex relative justify-center items-center w-12 h-12">
           <img className="rounded-full w-12 h-12" alt={name} src={icon} />
