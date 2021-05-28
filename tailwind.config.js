@@ -28,9 +28,9 @@ module.exports = {
         disabled: "#E6E6E6",
         background: "#fff",
         //darkmode colors
-        darkbg: "#211d45",
-        darkfg: "#171531",
-        darkgray: "#4b4779"
+        darkbg: "#191b1f",
+        darkfg: "#202129",
+        darkgray: "#2c2f36"
       },
       borderRadius: {
         DEFAULT: ".5rem",

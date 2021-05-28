@@ -23,11 +23,11 @@
   }
 
   .sidenav {
-    @apply my-2 px-6 py-2 flex items-center justify-start w-10/12 hover:bg-gray-100 dark:hover:bg-darkfg cursor-pointer rounded;
+    @apply my-2 px-6 py-2 flex items-center justify-start w-10/12 hover:bg-gray-100 dark:hover:bg-darkgray cursor-pointer rounded;
   }
 
   .sidenav.active {
-    @apply font-semibold;
+    @apply font-semibold bg-gray-100 dark:bg-darkgray;
   }
 
   .board {
@@ -40,11 +40,11 @@
 
   input,
   select {
-    @apply p-2 border-b-2 border-gray-200 dark:border-darkfg  focus:outline-none;
+    @apply p-2 border-b-2 border-gray-200 dark:border-darkfg dark:bg-darkbg focus:outline-none;
   }
 
   .form-input {
-    @apply flex flex-col justify-start mb-4;
+    @apply flex flex-col justify-start mb-4 dark:bg-darkbg;
   }
 
   .form-input label {
@@ -81,6 +81,6 @@
   }
 
   .optionbtn {
-    @apply p-4 flex items-center hover:bg-gray-100 dark:hover:bg-darkfg cursor-pointer rounded focus:outline-none;
+    @apply p-4 flex items-center hover:bg-gray-100 dark:hover:bg-darkgray cursor-pointer rounded focus:outline-none;
   }
 }
