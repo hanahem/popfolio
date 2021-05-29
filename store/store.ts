@@ -340,33 +340,58 @@ export async function getPrices(
   }
 }
 
+function flatten(arr) {
+  return arr.reduce(function (flat, toFlatten) {
+    return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+  }, []);
+}
+
 export async function loadWalletsData(
   gWallets: GroupedWallet[],
   timeFrame: string,
 ): Promise<AnyAction | void> {
   try {
-    let allWalletsData = {};
+    const allUsedTokens = [
+      ...new Set(flatten(gWallets.map((gw: GroupedWallet) => gw.assets.map((a) => a.cgId)))),
+    ] as string[];
     await Promise.all(
-      gWallets.map((gw: GroupedWallet) => {
-        const ids = gw.assets.map((gwa: Asset) => gwa.cgId) as string[];
-
-        let walletAssetsFetched = {};
-
-        ids.map(async (id: string) => {
-          await axios
-            .get(getMarketChartURI(id, timeFrame))
-            .then((iRes) => Object.assign(walletAssetsFetched, { [(gw.id as number).toString()]: iRes.data.prices }))
-            .catch((e) => {
-              //TODO: dispatch Failure
-              console.error(e);
-            });
-        });
-
-        return walletAssetsFetched
-      }),
+      allUsedTokens.map(
+        async (cgId: string) =>
+          await axios.get(getMarketChartURI(cgId, timeFrame)).then((res) => {
+            const data = { [cgId]: res.data.prices };
+            return data;
+          }),
+        //TODO: dispatch failure
+      ),
     ).then((res) => {
-      //Receives wallets data {walletName: priceData[][]}
-      console.log(res)
+      console.log(res);
+      //Process shortest
+
+      let data = {};
+      res.map((r) => Object.assign(data, r));
+
+      const shortestArray = res
+        .map((r) => Object.keys(r).map((key) => r[key]))
+        .reduce((prev, next) => (prev.length > next.length ? next : prev))[0];
+      const timeScale = flatten(shortestArray.map((sa) => sa[0]));
+
+      const shortenedData = Object.keys(data).map((key) => {
+        let timedData = [];
+        if (data[key].length > shortestArray.length) {
+          timedData = data[key].slice(
+            data[key].length - shortestArray.length - 1,
+            data[key].length - 1,
+          );
+        } else {
+          timedData = data[key];
+        }
+        return { [key]: timedData.map((t, idx) => [timeScale[idx], t[1]]) };
+      });
+
+      let formattedData = {};
+      shortenedData.map((r) => Object.assign(formattedData, r));
+
+      console.log(formattedData);
     });
   } catch (e) {
     //TODO: dispatch Failure
