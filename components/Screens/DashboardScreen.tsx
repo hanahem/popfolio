@@ -21,13 +21,15 @@ const DashboardScreen: FC = () => {
   const storeDb = useSelector((state: CustomState) => state.db);
 
   useEffect(() => {
-    (async function () {
-      try {
-        dispatch(loadDb(db));
-      } catch (e) {
-        console.error("DB load error: ", e);
-      }
-    })();
+    if(db){
+      (async function () {
+        try {
+          await dispatch(loadDb(db));
+        } catch (e) {
+          console.error("DB load error: ", e);
+        }
+      })();
+    }
   }, [db]);
 
   const [groupedAssets, setGroupedAssets] = useState<GroupedWallet[] | undefined>();
@@ -53,7 +55,7 @@ const DashboardScreen: FC = () => {
         )}
       </div> */}
 
-      {storeDb && groupedAssets?.length && storeDb.assets ? (
+      {storeDb && groupedAssets && groupedAssets?.length && storeDb.assets ? (
         <WalletsGrid wallets={groupedAssets} />
       ) : (
         <div className="mt-4">

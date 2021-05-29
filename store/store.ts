@@ -22,13 +22,15 @@ export type PricesType = {
 };
 
 export type WalletsPricesType = {
-  [id: number]: {
-    /*eslint-disable @typescript-eslint/no-explicit-any*/
-    data: any;
-    currentTotalAssets: {
-      [currecyName: string]: number;
+  data: {
+    [id: number]: {
+      lastPrice: number;
+      priceChange: number;
+      prices: number[][];
     };
-  };
+  }[];
+  cumulativePrice: number;
+  cumulativeChange: number;
 };
 
 export type WalletsPricesStatusType = StatusType;
@@ -93,53 +95,12 @@ const initialState: CustomState = {
 
 const reducer = (state = initialState, action: AnyAction) => {
   switch (action.type) {
-    case ActionTypes.FETCH_PRICES_REQUEST:
-      return {
-        ...state,
-        prices: {
-          ...state.prices,
-          status: {
-            success: false,
-            loading: true,
-            error: false,
-            errorMessage: "",
-          },
-        },
-      };
-    case ActionTypes.FETCH_PRICES_FAILURE:
-      return {
-        ...state,
-        prices: {
-          ...state.prices,
-          status: {
-            success: false,
-            loading: false,
-            error: true,
-            errorMessage: action.payload.errorMessage,
-          },
-        },
-      };
-    case ActionTypes.FETCH_PRICES_SUCCESS:
-      return {
-        ...state,
-        prices: {
-          data: action.payload.prices,
-          currentTotalAssets: action.payload.currentTotalAssets,
-          status: {
-            success: true,
-            loading: false,
-            error: false,
-            errorMessage: "",
-          },
-        },
-      };
     /**
      * Fetch wallets prices Reducers
      */
     case ActionTypes.FETCH_WALLETS_PRICES_REQUEST:
       return {
         ...state,
-        walletsPrices: action.payload.walletsPrices,
         walletsPricesStatus: {
           success: false,
           loading: true,
@@ -150,7 +111,6 @@ const reducer = (state = initialState, action: AnyAction) => {
     case ActionTypes.FETCH_WALLETS_PRICES_FAILURE:
       return {
         ...state,
-        walletsPrices: action.payload.walletsPrices,
         walletsPricesStatus: {
           success: false,
           loading: false,
@@ -159,9 +119,10 @@ const reducer = (state = initialState, action: AnyAction) => {
         },
       };
     case ActionTypes.FETCH_WALLETS_PRICES_SUCCESS:
+      console.log(action.payload);
       return {
         ...state,
-        walletsPrices: action.payload.walletsPrices,
+        walletsPrices: action.payload,
         walletsPricesStatus: {
           success: true,
           loading: false,
@@ -239,107 +200,6 @@ export const getSimplePriceURI = (ids: string[]): string =>
  ** Price Actions
  */
 
-export async function getPrices(
-  timeFrame: string,
-  ids: string[],
-  assets: Asset[],
-  walletId?: number,
-): Promise<AnyAction | void> {
-  store?.dispatch({
-    type: ActionTypes.FETCH_PRICES_REQUEST,
-  });
-
-  if (ids && assets && assets.length) {
-    await Promise.all(ids.map((id) => axios.get(getMarketChartURI(id, timeFrame))))
-      // SUCCESS
-      .then(async (res) => {
-        const data: { [id: string]: number[][] }[] = await Promise.all(
-          res.map((r) => ({
-            [r.request.responseURL.split("/")[6]]: r.data.prices,
-          })),
-        );
-
-        const assetsAmounts: { [key: string]: number } = assets.reduce(
-          (obj, item) =>
-            Object.assign(obj, {
-              [item.cgId as string]: item.amount as number,
-            }),
-          {},
-        );
-
-        const aggPrices = await axios.get(getSimplePriceURI(ids)).then((r) => r.data);
-        const currentTotalAssets = {
-          eur: Object.keys(aggPrices)
-            .map((key) => aggPrices[key].eur * assetsAmounts[key])
-            .reduce((a, b) => a + b),
-          usd: Object.keys(aggPrices)
-            .map((key) => aggPrices[key].usd * assetsAmounts[key])
-            .reduce((a, b) => a + b),
-        };
-
-        const aggTimes = ids.map((id, idx) => data[idx][id].map((dt) => dt[0]));
-        const shortestArray = aggTimes.reduce((prev, next) =>
-          prev.length > next.length ? next : prev,
-        );
-
-        /* eslint-disable  @typescript-eslint/no-explicit-any */
-        const objData: { [key: string]: any } = { ...data.map((dt, idx) => dt[ids[idx]]) };
-        const objDataArray = Object.keys(objData).map((k) => objData[k]);
-
-        //Array of price arrays for each asset in crypto
-        const basePricesMatrix = objDataArray
-          .map((oba) => [oba.map((p: number[]) => p[1])])
-          .map((pm) => pm[0]);
-        //Array of price arrays for each asset in fiat based on amount
-        const pricesMatrix = basePricesMatrix.map((pm, idx) =>
-          pm.map((val: number) => val * assetsAmounts[ids[idx]]),
-        );
-
-        //Fully computed prices with shortest array timestamps
-        const compPrices = shortestArray.map((sa: number, idx: number) => [
-          sa,
-          pricesMatrix[0].map((_: null, jdx: number) =>
-            pricesMatrix.reduce((sum, curr) => sum + curr[jdx], 0),
-          )[idx],
-        ]);
-
-        if (walletId) {
-          return store?.dispatch({
-            type: ActionTypes.FETCH_WALLETS_PRICES_SUCCESS,
-            payload: {
-              prices: compPrices,
-              currentTotalAssets: currentTotalAssets,
-              walletId,
-            },
-          });
-        } else {
-          return store?.dispatch({
-            type: ActionTypes.FETCH_PRICES_SUCCESS,
-            payload: {
-              prices: compPrices,
-              currentTotalAssets: currentTotalAssets,
-            },
-          });
-        }
-      })
-      // FAILURE
-      .catch((err) => {
-        console.error(err);
-        return store?.dispatch({
-          type: ActionTypes.FETCH_PRICES_FAILURE,
-          payload: { errorMessage: "Failed to load prices data" },
-        });
-      });
-  } else {
-    return store?.dispatch({
-      type: ActionTypes.FETCH_PRICES_FAILURE,
-      payload: {
-        errorMessage: "You don't have assets in your portfolio. Add some from your profile board.",
-      },
-    });
-  }
-}
-
 function flatten(arr) {
   return arr.reduce(function (flat, toFlatten) {
     return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
@@ -350,6 +210,10 @@ export async function loadWalletsData(
   gWallets: GroupedWallet[],
   timeFrame: string,
 ): Promise<AnyAction | void> {
+  store?.dispatch({
+    type: ActionTypes.FETCH_WALLETS_PRICES_REQUEST,
+  });
+
   try {
     const allUsedTokens = [
       ...new Set(flatten(gWallets.map((gw: GroupedWallet) => gw.assets.map((a) => a.cgId)))),
@@ -357,53 +221,97 @@ export async function loadWalletsData(
     await Promise.all(
       allUsedTokens.map(
         async (cgId: string) =>
-          await axios.get(getMarketChartURI(cgId, timeFrame)).then((res) => {
-            const data = { [cgId]: res.data.prices };
-            return data;
-          }),
-        //TODO: dispatch failure
+          await axios
+            .get(getMarketChartURI(cgId, timeFrame))
+            .then((res) => {
+              const data = { [cgId]: res.data.prices };
+              return data;
+            })
+            .catch((e) => console.error("Load prices of " + cgId + ": ", e)),
       ),
-    ).then((res) => {
-      console.log(res);
-      //Process shortest
+    )
+      .then((res) => {
+        //Format all tokens to {[token]: prices[][]}
+        let data = {};
+        res.map((r) => Object.assign(data, r));
 
-      let data = {};
-      res.map((r) => Object.assign(data, r));
+        const shortestArray = res
+          .map((r) => Object.keys(r).map((key) => r[key]))
+          .reduce((prev, next) => (prev.length > next.length ? next : prev))[0];
+        const timeScale = flatten(shortestArray.map((sa) => sa[0]));
 
-      const shortestArray = res
-        .map((r) => Object.keys(r).map((key) => r[key]))
-        .reduce((prev, next) => (prev.length > next.length ? next : prev))[0];
-      const timeScale = flatten(shortestArray.map((sa) => sa[0]));
+        const shortenedData = Object.keys(data).map((key) => {
+          let timedData = [];
+          if (data[key].length > shortestArray.length) {
+            timedData = data[key].slice(
+              data[key].length - shortestArray.length - 1,
+              data[key].length - 1,
+            );
+          } else {
+            timedData = data[key];
+          }
+          return { [key]: timedData.map((t, idx) => [timeScale[idx], t[1]]) };
+        });
 
-      const shortenedData = Object.keys(data).map((key) => {
-        let timedData = [];
-        if (data[key].length > shortestArray.length) {
-          timedData = data[key].slice(
-            data[key].length - shortestArray.length - 1,
-            data[key].length - 1,
-          );
-        } else {
-          timedData = data[key];
-        }
-        return { [key]: timedData.map((t, idx) => [timeScale[idx], t[1]]) };
+        let formattedData = {};
+        shortenedData.map((r) => Object.assign(formattedData, r));
+
+        //Format from tokens to wallets {[walletId]: {prices[][], lastPrice, priceChange}}
+        const formattedWallets = gWallets.map((gw) => ({
+          [(gw.id as number).toString()]: gw.assets
+            .map((a) => a.cgId)
+            .map((cgId) => {
+              const prices = formattedData[cgId];
+              const lastPrice = prices[prices.length - 1][1];
+              const firstPrice = prices[0][1];
+              const priceChange = ((lastPrice - firstPrice) / firstPrice) * 100;
+              return {
+                [cgId]: {
+                  prices,
+                  lastPrice,
+                  priceChange,
+                },
+              };
+            }),
+        }));
+
+        // const cumulativePrice = formattedWallets.map((fw) => {
+        //   Object.keys(fw).map((key) =>
+        //     // Object.keys(fw[key]).map((k2) => fw[key][k2].reduce((a, b) => a[1] + b[1])),
+            
+        //   );
+        // });
+
+        return store?.dispatch({
+          type: ActionTypes.FETCH_WALLETS_PRICES_SUCCESS,
+          payload: {
+            data: formattedWallets,
+            cumulativePrice: 0,
+            cumulativeChange: 0,
+          },
+        });
+      })
+      .catch((e) => {
+        console.error("Load prices promise error ", e);
+        return store?.dispatch({
+          type: ActionTypes.FETCH_WALLETS_PRICES_FAILURE,
+          payload: { errorMessage: "Failed to load prices data" },
+        });
       });
-
-      let formattedData = {};
-      shortenedData.map((r) => Object.assign(formattedData, r));
-
-      console.log(formattedData);
-    });
   } catch (e) {
-    //TODO: dispatch Failure
-    console.error(e);
+    console.error("Load prices error ", e);
+    return store?.dispatch({
+      type: ActionTypes.FETCH_WALLETS_PRICES_FAILURE,
+      payload: { errorMessage: "Failed to load prices data" },
+    });
   }
 }
 
-export async function loadDb(db: PortfolioDataBase): Promise<void> {
+export async function loadDb(db: PortfolioDataBase): Promise<AnyAction | void> {
   const assets = await db.assets.toArray();
   const wallets = await db.wallets.toArray();
   if (db) {
-    store?.dispatch({
+    return store?.dispatch({
       type: ActionTypes.LOAD_DB_SUCCESS,
       payload: {
         wallets,
