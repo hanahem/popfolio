@@ -52,7 +52,6 @@ const ChartContainer: FC<{
   wallet?: GroupedWallet;
 }> = ({ ids, assets, isWallet, wallet }) => {
   const dispatch = useDispatch();
-  const { theme } = useTheme();
 
   //Store data
   const prices = useSelector((state: CustomState) => state.prices);
@@ -60,67 +59,34 @@ const ChartContainer: FC<{
   const currency = useSelector((state: CustomState) => state.currency);
 
   //Local state
-  const [data, set_data] = useState<ChartData | undefined>(undefined);
-  const [timeFrame, setTimeFrame] = useState("1");
-  const [finalPrice, setFinalPrice] = useState(0);
-  const [priceChange, setPriceChange] = useState(0);
+  // const [data, set_data] = useState<ChartData | undefined>(undefined);
+  // const [timeFrame, setTimeFrame] = useState("1");
+  // const [finalPrice, setFinalPrice] = useState(0);
+  // const [priceChange, setPriceChange] = useState(0);
 
   //Functions
-  async function updateData(
-    prices: number[][],
-    currentPrice: { [currency: string]: number },
-    currency: Currencies,
-    totalPrice?: number,
-  ) {
-    set_data({
-      labels: prices?.map((p: number[]) => p[0]),
-      datasets: [
-        {
-          data: prices?.map((p: number[]) => p[1]),
-          fill: "start",
-          backgroundColor: "#ffd0ea",
-          borderColor: "#eb7cb8",
-        },
-      ],
-    });
-    const firstPrice = prices?.[0][1];
-    const lastPrice = totalPrice || currentPrice?.[currency];
-    setFinalPrice(lastPrice);
-    setPriceChange(((lastPrice - firstPrice) / firstPrice) * 100);
-  }
-
-  //Effects
-  useEffect(() => {
-    (async function () {
-      try {
-        if (isWallet && wallet) {
-          const ids = wallet.assets.map((asset: Asset) => asset.cgId) as string[];
-          await dispatch(getPrices(timeFrame, ids, wallet?.assets, wallet?.id));
-        } else {
-          await dispatch(getPrices(timeFrame, ids, assets));
-        }
-      } catch (e) {
-        console.error("getPrices error: ", e);
-      }
-    })();
-  }, [timeFrame, wallet]);
-
-  useEffect(() => {
-    if (prices.data && prices.data.length && currency && walletsPrices) {
-      const totalPrice = Object.keys(walletsPrices)
-        .map((id: string) => walletsPrices[parseInt(id)])
-        .map((a) => a.currentTotalAssets[currency])
-        .reduce((a, b) => a + b);
-      updateData(prices.data, prices.currentTotalAssets, currency, totalPrice);
-    }
-    if (walletsPrices && wallet && wallet.id) {
-      updateData(
-        walletsPrices[wallet.id]?.data,
-        walletsPrices[wallet.id]?.currentTotalAssets,
-        currency,
-      );
-    }
-  }, [prices, walletsPrices, currency, wallet]);
+  // async function updateData(
+  //   prices: number[][],
+  //   currentPrice: { [currency: string]: number },
+  //   currency: Currencies,
+  //   totalPrice?: number,
+  // ) {
+  //   set_data({
+  //     labels: prices?.map((p: number[]) => p[0]),
+  //     datasets: [
+  //       {
+  //         data: prices?.map((p: number[]) => p[1]),
+  //         fill: "start",
+  //         backgroundColor: "#ffd0ea",
+  //         borderColor: "#eb7cb8",
+  //       },
+  //     ],
+  //   });
+  //   const firstPrice = prices?.[0][1];
+  //   const lastPrice = totalPrice || currentPrice?.[currency];
+  //   setFinalPrice(lastPrice);
+  //   setPriceChange(((lastPrice - firstPrice) / firstPrice) * 100);
+  // }
 
   const options = {
     maintainAspectRatio: false,
@@ -143,15 +109,15 @@ const ChartContainer: FC<{
   if (isWallet && wallet) {
     return (
       <div className={"absolute bottom-0 left-0 w-full h-1/2 z-0 opacity-25"}>
-        {!prices?.status?.loading && data ? (
+        {/* {!prices?.status?.loading && data ? (
           <Line type="line" data={data} options={options} height={128} />
-        ) : null}
+        ) : null} */}
       </div>
     );
   } else {
     return (
       <div className={"h-44"}>
-        <div className="w-full">
+        {/* <div className="w-full">
           <div className="rounded-lg border border-gray-300 dark:border-black mb-4">
             <div className="rounded-lg bg-white dark:bg-darkbg relative overflow-hidden">
               <div className="px-3 pt-8 pb-10 text-center relative z-10">
@@ -179,7 +145,7 @@ const ChartContainer: FC<{
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     );
   }

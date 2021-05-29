@@ -45,13 +45,13 @@ const DashboardScreen: FC = () => {
   return (
     <div>
       <Title title="Overview" subtitle="An overview of your portfolio and assets performance" />
-      <div className="w-full my-8">
+      {/* <div className="w-full my-8">
         {storeDb ? (
           <OverviewChart ids={storeDb.plainAssets} assets={storeDb.assets} />
         ) : (
           <div className="h-44 animate-pulse" />
         )}
-      </div>
+      </div> */}
 
       {storeDb && groupedAssets?.length && storeDb.assets ? (
         <WalletsGrid wallets={groupedAssets} />

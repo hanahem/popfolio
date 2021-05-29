@@ -1,9 +1,16 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { useMemo } from "react";
 import { createStore, applyMiddleware, Store, AnyAction } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
 import { PortfolioDataBase } from "../utils/dbInit";
-import { Asset, Wallet } from "../utils/types";
+import { Asset, GroupedWallet, Wallet } from "../utils/types";
+
+export type StatusType = {
+  success: boolean;
+  loading: boolean;
+  error: boolean;
+  errorMessage: string;
+};
 
 export type PricesType = {
   /*eslint-disable @typescript-eslint/no-explicit-any*/
@@ -11,12 +18,7 @@ export type PricesType = {
   currentTotalAssets: {
     [currencyName: string]: number;
   };
-  status: {
-    success: boolean;
-    loading: boolean;
-    error: boolean;
-    errorMessage: string;
-  };
+  status: StatusType;
 };
 
 export type WalletsPricesType = {
@@ -28,6 +30,8 @@ export type WalletsPricesType = {
     };
   };
 };
+
+export type WalletsPricesStatusType = StatusType;
 
 export type DbType = {
   wallets: Wallet[];
@@ -44,7 +48,10 @@ export enum ActionTypes {
   FETCH_PRICES_REQUEST = "FETCH_PRICES_REQUEST",
   FETCH_PRICES_FAILURE = "FETCH_PRICES_FAILURE",
   FETCH_PRICES_SUCCESS = "FETCH_PRICES_SUCCESS",
-  FETCH_WALLET_PRICES_SUCCESS = "FETCH_WALLET_PRICES_SUCCESS",
+
+  FETCH_WALLETS_PRICES_REQUEST = "FETCH_WALLETS_PRICES_REQUEST",
+  FETCH_WALLETS_PRICES_FAILURE = "FETCH_WALLETS_PRICES_FAILURE",
+  FETCH_WALLETS_PRICES_SUCCESS = "FETCH_WALLETS_PRICES_SUCCESS",
 
   LOAD_DB_SUCCESS = "LOAD_DB_SUCCESS",
 
@@ -59,6 +66,7 @@ export type CustomState = {
   currency: Currencies;
   prices: PricesType;
   walletsPrices?: WalletsPricesType;
+  walletsPricesStatus?: WalletsPricesStatusType;
   db?: DbType;
 };
 
@@ -79,6 +87,7 @@ const initialState: CustomState = {
     },
   },
   walletsPrices: undefined,
+  walletsPricesStatus: undefined,
   db: undefined,
 };
 
@@ -124,25 +133,45 @@ const reducer = (state = initialState, action: AnyAction) => {
           },
         },
       };
-    case ActionTypes.FETCH_WALLET_PRICES_SUCCESS:
+    /**
+     * Fetch wallets prices Reducers
+     */
+    case ActionTypes.FETCH_WALLETS_PRICES_REQUEST:
       return {
         ...state,
-        walletsPrices: {
-          ...state.walletsPrices,
-          [action.payload.walletId]: {
-            data: action.payload.prices,
-            currentTotalAssets: action.payload.currentTotalAssets,
-          },
-        },
-        prices: {
-          status: {
-            success: true,
-            loading: false,
-            error: false,
-            errorMessage: "",
-          },
+        walletsPrices: action.payload.walletsPrices,
+        walletsPricesStatus: {
+          success: false,
+          loading: true,
+          error: false,
+          errorMessage: "",
         },
       };
+    case ActionTypes.FETCH_WALLETS_PRICES_FAILURE:
+      return {
+        ...state,
+        walletsPrices: action.payload.walletsPrices,
+        walletsPricesStatus: {
+          success: false,
+          loading: false,
+          error: true,
+          errorMessage: action.payload.errorMessage,
+        },
+      };
+    case ActionTypes.FETCH_WALLETS_PRICES_SUCCESS:
+      return {
+        ...state,
+        walletsPrices: action.payload.walletsPrices,
+        walletsPricesStatus: {
+          success: true,
+          loading: false,
+          error: false,
+          errorMessage: "",
+        },
+      };
+    /**
+     * Load Db Reducers
+     */
     case ActionTypes.LOAD_DB_SUCCESS:
       return {
         ...state,
@@ -153,7 +182,7 @@ const reducer = (state = initialState, action: AnyAction) => {
         ...state,
         currency: action.payload,
       };
-      case ActionTypes.UPDATE_DARKMODE:
+    case ActionTypes.UPDATE_DARKMODE:
       return {
         ...state,
         darkMode: action.payload,
@@ -276,7 +305,7 @@ export async function getPrices(
 
         if (walletId) {
           return store?.dispatch({
-            type: ActionTypes.FETCH_WALLET_PRICES_SUCCESS,
+            type: ActionTypes.FETCH_WALLETS_PRICES_SUCCESS,
             payload: {
               prices: compPrices,
               currentTotalAssets: currentTotalAssets,
@@ -311,6 +340,40 @@ export async function getPrices(
   }
 }
 
+export async function loadWalletsData(
+  gWallets: GroupedWallet[],
+  timeFrame: string,
+): Promise<AnyAction | void> {
+  try {
+    let allWalletsData = {};
+    await Promise.all(
+      gWallets.map((gw: GroupedWallet) => {
+        const ids = gw.assets.map((gwa: Asset) => gwa.cgId) as string[];
+
+        let walletAssetsFetched = {};
+
+        ids.map(async (id: string) => {
+          await axios
+            .get(getMarketChartURI(id, timeFrame))
+            .then((iRes) => Object.assign(walletAssetsFetched, { [(gw.id as number).toString()]: iRes.data.prices }))
+            .catch((e) => {
+              //TODO: dispatch Failure
+              console.error(e);
+            });
+        });
+
+        return walletAssetsFetched
+      }),
+    ).then((res) => {
+      //Receives wallets data {walletName: priceData[][]}
+      console.log(res)
+    });
+  } catch (e) {
+    //TODO: dispatch Failure
+    console.error(e);
+  }
+}
+
 export async function loadDb(db: PortfolioDataBase): Promise<void> {
   const assets = await db.assets.toArray();
   const wallets = await db.wallets.toArray();
@@ -334,7 +397,6 @@ export function updateCurrency(): void {
     payload: nextCurrency,
   });
 }
-
 
 export function updateDarkMode(): void {
   const darkMode = store?.getState().darkMode;

@@ -6,7 +6,8 @@ import { useStore } from "../store/store";
 import Head from "next/head";
 import SidebarWrapper from "../components/SideBarWrapper/SideBarWrapper";
 import { ToastProvider } from "react-toast-notifications";
-import { ThemeProvider } from 'next-themes'
+import { ThemeProvider } from "next-themes";
+import AppProvider from "../components/AppProvider/AppProvider";
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/
 export default function App({ Component, pageProps }: AppProps) {
@@ -22,9 +23,11 @@ export default function App({ Component, pageProps }: AppProps) {
               <link rel="shortcut icon" href="/images/lollipop.png" />
               <script src="/node_modules/@lottiefiles/lottie-player/dist/lottie-player.js"></script>
             </Head>
-            <SidebarWrapper>
-              <Component {...pageProps} />
-            </SidebarWrapper>
+            <AppProvider>
+              <SidebarWrapper>
+                <Component {...pageProps} />
+              </SidebarWrapper>
+            </AppProvider>
           </>
         </ToastProvider>
       </ThemeProvider>
